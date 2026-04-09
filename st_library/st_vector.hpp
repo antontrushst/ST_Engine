@@ -19,23 +19,23 @@ struct Vector2D
     const float& operator [](int index) const {return ((&x)[index]);}
     Vector2D&    operator +=(const Vector2D &v)
     {
-        x+=v.x; y+=v.y;
+        x += v.x; y += v.y;
         return *this;
     }
     Vector2D&    operator -=(const Vector2D &v)
     {
-        x-=v.x; y-=v.y;
+        x -= v.x; y -= v.y;
         return *this;
     }
     Vector2D&    operator *=(float s)
     {
-        x*=s; y*=s;
+        x *= s; y *= s;
         return *this;
     }
     Vector2D&    operator /=(float s)
     {
-        s = 1.0f/s;
-        x*=s; y*=s;
+        s = 1.0f / s;
+        x *= s; y *= s;
         return *this;
     }
 };
@@ -110,10 +110,6 @@ struct Vector3D
         return *this;
     }
 };
-
-#ifdef SFML_GRAPHICS_HPP
-// SFML specific vectors
-#endif
 
 inline Vector3D operator +(const Vector3D &a, const Vector3D &b)
 {
