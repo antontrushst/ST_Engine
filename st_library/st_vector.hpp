@@ -76,6 +76,11 @@ inline Vector2D normalize(const Vector2D &v)
     return (v / magnitude(v));
 }
 
+inline void print(Vector2D &v)
+{
+    std::cout << "(" << v.x << ", " << v.y << ")\n";
+}
+
 // VECTOR 3D ///////////////////////////////////////////////////////////////////
 struct Vector3D
 {
@@ -145,6 +150,11 @@ inline float magnitude(const Vector3D &v)
 inline Vector3D normalize(const Vector3D &v)
 {
     return (v / magnitude(v));
+}
+
+inline void print(Vector3D &v)
+{
+    std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")\n";
 }
 
 }
