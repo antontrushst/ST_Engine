@@ -76,6 +76,11 @@ inline Vector2D normalize(const Vector2D &v)
     return (v / magnitude(v));
 }
 
+inline float dot(const Vector2D &a, const Vector2D &b)
+{
+    return a.x*b.x + a.y*b.y;
+}
+
 inline void print(Vector2D &v)
 {
     std::cout << "(" << v.x << ", " << v.y << ")\n";
@@ -150,6 +155,28 @@ inline float magnitude(const Vector3D &v)
 inline Vector3D normalize(const Vector3D &v)
 {
     return (v / magnitude(v));
+}
+
+inline float dot(const Vector3D &a, const Vector3D &b)
+{
+    return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
+inline Vector3D cross(const Vector3D &a, const Vector3D &b)
+{
+    return Vector3D{a.y * b.z - a.z * b.y,
+                    a.z * b.x - a.x * b.z,
+                    a.x * b.y - a.y * b.x};
+}
+
+inline Vector3D project(const Vector3D &a, const Vector3D &b)
+{
+    return b * (dot(a, b) / dot(b, b));
+}
+
+inline Vector3D reject(const Vector3D &a, const Vector3D &b)
+{
+    return a - b * (dot(a, b) / dot(b, b));
 }
 
 inline void print(Vector3D &v)
