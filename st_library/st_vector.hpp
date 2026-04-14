@@ -81,6 +81,16 @@ inline float dot(const Vector2D &a, const Vector2D &b)
     return a.x*b.x + a.y*b.y;
 }
 
+inline Vector2D project(const Vector2D &a, const Vector2D &b)
+{
+    return b * (dot(a, b) / dot(b, b));
+}
+
+inline Vector2D reject(const Vector2D &a, const Vector2D &b)
+{
+    return a - b * (dot(a, b) / dot(b, b));
+}
+
 inline void print(Vector2D &v)
 {
     std::cout << "(" << v.x << ", " << v.y << ")\n";
