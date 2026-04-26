@@ -4,6 +4,8 @@
 // Based on "Foundations of Game Engine Development: Volume 1 - Mathematics"
 // by Eric Lengyel.
 
+#include "st_vector.hpp"
+
 namespace st
 {
 
@@ -44,7 +46,15 @@ inline Vector2D operator *(const Matrix2D &M, const Vector2D &v)
 
 inline float determinant(const Matrix2D &M)
 {
-    return M(0,0)*M(1,1) - M(1,0)*M(0,1);
+    return M(0,0)*M(1,1) - M(0,1)*M(1,0);
+}
+
+inline Matrix2D inverse(const Matrix2D &M)
+{
+    float intDet = 1.f / M(0,0) * M(1,1) - M(0,1) * M(1,0);
+
+    return Matrix2D(M(1,1) * intDet, -M(0,1) * intDet,
+                   -M(1,0) * intDet,  M(0,0) * intDet);
 }
 
 inline void print(const Matrix2D &M)
@@ -104,12 +114,58 @@ inline float determinant(const Matrix3D &M)
            M(0,2) * (M(1,0)*M(2,1) - M(1,1)*M(2,0));
 }
 
+inline Matrix3D inverse(const Matrix3D &M)
+{
+    const Vector3D &a = M[0];
+    const Vector3D &b = M[1];
+    const Vector3D &c = M[2];
+
+    Vector3D r0 = cross(b, c);
+    Vector3D r1 = cross(c, a);
+    Vector3D r2 = cross(a, b);
+
+    float intDet = 1.f / dot(r2, c);
+
+    return Matrix3D(r0.x * intDet, r0.y * intDet, r0.z * intDet,
+                    r1.x * intDet, r1.y * intDet, r1.z * intDet,
+                    r2.x * intDet, r2.y * intDet, r2.z * intDet);
+}
+
 inline void print(const Matrix3D &M)
 {
     std::cout << "|" << M(0,0) << ", " << M(0,1) << ", " << M(0,2) << "|\n";
     std::cout << "|" << M(1,0) << ", " << M(1,1) << ", " << M(1,2) << "|\n";
     std::cout << "|" << M(2,0) << ", " << M(2,1) << ", " << M(2,2) << "|\n";
 }
+
+// MATRIX 4D ///////////////////////////////////////////////////////////////////
+struct Matrix4D
+{
+private:
+    float n[4][4];
+public:
+    Matrix4D() = default;
+    Matrix4D(float n00, float n10, float n20, float n30,
+             float n01, float n11, float n21, float n31,
+             float n02, float n12, float n22, float n32,
+             float n03, float n13, float n23, float n33)
+        : n{{n00, n10, n20, n30}, {n01, n11, n21, n31}
+        ,   {n02, n12, n22, n32}, {n03, n13, n23, n33}} {}
+    Matrix4D(const Vector4D &a, const Vector4D &b
+            ,const Vector4D &c, const Vector4D &d)
+        : n{{a.x, a.y, a.z, a.w}, {b.x, b.y, b.z, b.w}
+        ,   {c.x, c.y, c.z, c.w}, {d.x, d.y, d.z, d.w}} {}
+
+    float& operator ()(int i, int j) {return n[j][i];}
+    const float& operator ()(int i, int j) const {return n[j][i];}
+    Vector4D& operator [](int j) {return *reinterpret_cast<Vector4D*>(n[j]);}
+    const Vector4D& operator [](int j) const
+    {
+        return *reinterpret_cast<const Vector4D*>(n[j]);
+    }
+
+    
+};
 
 }
 

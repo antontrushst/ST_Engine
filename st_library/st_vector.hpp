@@ -83,12 +83,12 @@ inline float dot(const Vector2D &a, const Vector2D &b)
 
 inline Vector2D project(const Vector2D &a, const Vector2D &b)
 {
-    return b * (dot(a, b) / dot(b, b));
+    return b * dot(a, b);
 }
 
 inline Vector2D reject(const Vector2D &a, const Vector2D &b)
 {
-    return a - b * (dot(a, b) / dot(b, b));
+    return a - b * dot(a, b);
 }
 
 inline void print(Vector2D &v)
@@ -181,17 +181,104 @@ inline Vector3D cross(const Vector3D &a, const Vector3D &b)
 
 inline Vector3D project(const Vector3D &a, const Vector3D &b)
 {
-    return b * (dot(a, b) / dot(b, b));
+    return b * dot(a, b);
 }
 
 inline Vector3D reject(const Vector3D &a, const Vector3D &b)
 {
-    return a - b * (dot(a, b) / dot(b, b));
+    return a - b * dot(a, b);
 }
 
 inline void print(Vector3D &v)
 {
     std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")\n";
+}
+
+// VECTOR 4D ///////////////////////////////////////////////////////////////////
+struct Vector4D
+{
+    float x, y, z, w;
+
+    Vector4D() = default;
+    Vector4D(float a, float b, float c, float d)
+        : x{a}, y{b}, z{c}, w{d}
+    {}
+
+    float&       operator [](int index) {return ((&x)[index]);}
+    const float& operator [](int index) const {return ((&x)[index]);}
+    Vector4D&    operator +=(const Vector4D &v)
+    {
+        x += v.x; y += v.y; z += v.z; w += v.w;
+        return *this;
+    }
+    Vector4D&    operator -=(const Vector4D &v)
+    {
+        x -= v.x; y -= v.y; z -= v.z; w -= v.w;
+        return *this;
+    }
+    Vector4D&    operator *=(float s)
+    {
+        x *= s; y *= s; z *= s; w *= s;
+        return *this;
+    }
+    Vector4D&    operator /=(float s)
+    {
+        s = 1.0f / s;
+        x *= s; y *= s; z *= s; w *= s;
+        return *this;
+    }
+};
+
+inline Vector4D operator +(const Vector4D &a, const Vector4D &b)
+{
+    return Vector4D{a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w};
+}
+
+inline Vector4D operator -(const Vector4D &a, const Vector4D &b)
+{
+    return Vector4D{a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w};
+}
+
+inline Vector4D operator *(const Vector4D &v, float s)
+{
+    return Vector4D{v.x * s, v.y * s, v.z * s, v.w * s};
+}
+
+inline Vector4D operator /(const Vector4D &v, float s)
+{
+    s = 1.0f / s;
+    return Vector4D{v.x * s, v.y * s, v.z * s, v.w * s};
+}
+
+inline float magnitude(const Vector4D &v)
+{
+    return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
+}
+
+inline Vector4D normalize(const Vector4D &v)
+{
+    return (v / magnitude(v));
+}
+
+inline float dot(const Vector4D &a, const Vector4D &b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
+
+inline Vector4D project(const Vector4D &a, const Vector4D &b)
+{
+    return b * dot(a, b);
+}
+
+inline Vector4D reject(const Vector4D &a, const Vector4D &b)
+{
+    return a - b * dot(a, b);
+}
+
+inline void print(const Vector4D &v)
+{
+    std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w
+              << ")\n";
 }
 
 }
