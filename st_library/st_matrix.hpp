@@ -12,9 +12,8 @@ namespace st
 // MATRIX 2D ///////////////////////////////////////////////////////////////////
 struct Matrix2D
 {
-private:
     float n[2][2];
-public:
+
     Matrix2D() = default;
     Matrix2D(float n00, float n10, float n01, float n11)
         : n{{n00, n10}, {n01, n11}} {}
@@ -51,10 +50,10 @@ inline float determinant(const Matrix2D &M)
 
 inline Matrix2D inverse(const Matrix2D &M)
 {
-    float intDet = 1.f / M(0,0) * M(1,1) - M(0,1) * M(1,0);
+    float invDet = 1.f / M(0,0) * M(1,1) - M(0,1) * M(1,0);
 
-    return Matrix2D(M(1,1) * intDet, -M(0,1) * intDet,
-                   -M(1,0) * intDet,  M(0,0) * intDet);
+    return Matrix2D(M(1,1) * invDet, -M(0,1) * invDet,
+                   -M(1,0) * invDet,  M(0,0) * invDet);
 }
 
 inline void print(const Matrix2D &M)
@@ -67,9 +66,8 @@ inline void print(const Matrix2D &M)
 // MATRIX 3D ///////////////////////////////////////////////////////////////////
 struct Matrix3D
 {
-private:
     float n[3][3];
-public:
+
     Matrix3D() = default;
     Matrix3D(float n00, float n10, float n20,
              float n01, float n11, float n21,
@@ -124,11 +122,11 @@ inline Matrix3D inverse(const Matrix3D &M)
     Vector3D r1 = cross(c, a);
     Vector3D r2 = cross(a, b);
 
-    float intDet = 1.f / dot(r2, c);
+    float invDet = 1.f / dot(r2, c);
 
-    return Matrix3D(r0.x * intDet, r0.y * intDet, r0.z * intDet,
-                    r1.x * intDet, r1.y * intDet, r1.z * intDet,
-                    r2.x * intDet, r2.y * intDet, r2.z * intDet);
+    return Matrix3D(r0.x * invDet, r0.y * invDet, r0.z * invDet,
+                    r1.x * invDet, r1.y * invDet, r1.z * invDet,
+                    r2.x * invDet, r2.y * invDet, r2.z * invDet);
 }
 
 inline void print(const Matrix3D &M)
@@ -141,9 +139,8 @@ inline void print(const Matrix3D &M)
 // MATRIX 4D ///////////////////////////////////////////////////////////////////
 struct Matrix4D
 {
-private:
     float n[4][4];
-public:
+
     Matrix4D() = default;
     Matrix4D(float n00, float n10, float n20, float n30,
              float n01, float n11, float n21, float n31,
@@ -164,7 +161,80 @@ public:
         return *reinterpret_cast<const Vector4D*>(n[j]);
     }
 
-    
+    Matrix4D& operator *=(const Matrix4D &m)
+    {
+        float x = m00;
+        float y = m01;
+        float z = m02;
+        float w = m03;
+        m00 = x * m.m00 + y * m.m10 + z * m.m20 + w * m.m30;
+        m01 = x * m.m01 + y * m.m11 + z * m.m21 + w * m.m31;
+        m02 = x * m.m02 + y * m.m12 + z * m.m22 + w * m.m32;
+        m03 = x * m.m03 + y * m.m13 + z * m.m23 + w * m.m33;
+
+        x = m10;
+        y = m11;
+        z = m12;
+        w = m13;
+        m10 = x * m.m00 + y * m.m10 + z * m.m20 + w * m.m30;
+        m11 = x * m.m01 + y * m.m11 + z * m.m21 + w * m.m31;
+        m12 = x * m.m02 + y * m.m12 + z * m.m22 + w * m.m32;
+        m13 = x * m.m03 + y * m.m13 + z * m.m23 + w * m.m33;
+
+        x = m20;
+        y = m21;
+        z = m22;
+        w = m23;
+        m20 = x * m.m00 + y * m.m10 + z * m.m20 + w * m.m30;
+        m21 = x * m.m01 + y * m.m11 + z * m.m21 + w * m.m31;
+        m22 = x * m.m02 + y * m.m12 + z * m.m22 + w * m.m32;
+        m23 = x * m.m03 + y * m.m13 + z * m.m23 + w * m.m33;
+
+        x = m30;
+        y = m31;
+        z = m32;
+        w = m33;
+        m30 = x * m.m00 + y * m.m10 + z * m.m20 + w * m.m30;
+        m31 = x * m.m01 + y * m.m11 + z * m.m21 + w * m.m31;
+        m32 = x * m.m02 + y * m.m12 + z * m.m22 + w * m.m32;
+        m33 = x * m.m03 + y * m.m13 + z * m.m23 + w * m.m33;
+
+        return *this;
+    }
+
+    inline Matrix4D inverse(const Matrix4D &M)
+    {
+        const Vector3D &a = reinterpret_cast<const Vector3D&>(M[0]);
+        const Vector3D &b = reinterpret_cast<const Vector3D&>(M[1]);
+        const Vector3D &c = reinterpret_cast<const Vector3D&>(M[2]);
+        const Vector3D &d = reinterpret_cast<const Vector3D&>(M[3]);
+
+        const float &x = M(3,0);
+        const float &y = M(3,1);
+        const float &z = M(3,2);
+        const float &w = M(3,3);
+
+        Vector3D s = cross(a,b);
+        Vector3D t = cross(c,d);
+        Vector3D u = a * y - b * x;
+        Vector3D v = c * w - d * z;
+
+        float invDet = 1.f / (dot(s,v) + dot(t,u));
+        s *= invDet;
+        t *= invDet;
+        u *= invDet;
+        v *= invDet;
+
+        Vector3D r0 = cross(b,v) + t * y;
+        Vector3D r1 = cross(v,a) - t * x;
+        Vector3D r2 = cross(d,u) + s * w;
+        Vector3D r3 = cross(u,c) - s * z;
+
+        return Matrix4D{r0.x, r0.y, r0.z, -dot(d,t),
+                        r1.x, r1.y, r1.z,  dot(a,t),
+                        r2.x, r2.y, r2.z, -dot(d,s),
+                        r3.x, r3.y, r3.z,  dot(c,s)};
+    }
 };
 
 }
