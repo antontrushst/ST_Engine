@@ -129,6 +129,51 @@ inline Matrix3D inverse(const Matrix3D &M)
                     r2.x * invDet, r2.y * invDet, r2.z * invDet);
 }
 
+inline Matrix3D makeRotationX(float t)
+{
+    float c = std::cos(t);
+    float s = std::sin(t);
+    return Matrix3D{1.f, 0.f, 0.f,
+                    0.f,   c,  -s,
+                    0.f,   s,   c};
+}
+
+inline Matrix3D makeRotationY(float t)
+{
+    float c = std::cos(t);
+    float s = std::sin(t);
+    return Matrix3D{  c, 0.f,   s,
+                    0.f, 1.f, 0.f,
+                     -s, 0.f,   c};
+}
+
+inline Matrix3D makeRotationZ(float t)
+{
+    float c = std::cos(t);
+    float s = std::sin(t);
+    return Matrix3D{  c,  -s, 0.f,
+                      s,   c, 0.f,
+                    0.f, 0.f, 1.f};
+}
+
+inline Matrix3D makeRotation(float t, const Vector3D &a)
+{
+    float c = std::cos(t);
+    float s = std::sin(s);
+    float d = 1.f - c;
+
+    float x = a.x * d;
+    float y = a.y * d;
+    float z = a.z * d;
+    float axay = x * a.y;
+    float axaz = x * a.z;
+    float ayaz = y * a.z;
+
+    return Matrix3D{   c + x * a.x, axay - s * a.z, axaz + s * a.y,
+                    axay + s * a.z,    c + y * a.y, ayaz - s * a.x,
+                    axaz - s * a.y, ayaz + s * a.x,    c + z * a.z};
+}
+
 inline void print(const Matrix3D &M)
 {
     std::cout << "|" << M(0,0) << ", " << M(0,1) << ", " << M(0,2) << "|\n";
