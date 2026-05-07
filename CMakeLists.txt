@@ -17,5 +17,5 @@ FetchContent_MakeAvailable(SFML)
 add_executable(${PROJECT_NAME} src/steng_main.cpp
     src/steng_mainWindow.cpp)
 
-target_include_directories(${PROJECT_NAME} PRIVATE "./" "st_library/")
+target_include_directories(${PROJECT_NAME} PRIVATE "src/headers" "st_library/")
 target_link_libraries(${PROJECT_NAME} PRIVATE SFML::Graphics)
