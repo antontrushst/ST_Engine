@@ -5,15 +5,16 @@
 #include <SFML/Graphics.hpp>
 
 #include "st_sfml.hpp"
-#include "st_system.hpp"
-#include "st_vector.hpp"
+#include "steng_config.hpp"
 
 class MainWindow
 {
+    EngineConfig *engineConfig = nullptr;
     sf::RenderWindow mainWindow;
+    st_sfml::Quads uiBoxes;
     
 public:
-    MainWindow();
+    MainWindow(EngineConfig &engineConfig);
 
     void init();
     void handleEvents();
