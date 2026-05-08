@@ -1,8 +1,16 @@
 #include "steng_mainWindow.hpp"
 
-MainWindow::MainWindow()
-    : mainWindow(sf::RenderWindow(sf::VideoMode({300,400}), "main"))
-{}
+MainWindow::MainWindow(EngineConfig &engineConfig)
+    : engineConfig{&engineConfig}
+    , mainWindow(sf::RenderWindow(sf::VideoMode(
+         {static_cast<unsigned int>(engineConfig.mainWindow_width)
+        , static_cast<unsigned int>(engineConfig.mainWindow_height)})
+        , "ST_Engine"))
+    , uiBoxes{1}
+{
+    this->uiBoxes.assign(1, "globalFrame", {640.f, 360.f}, {1000.f, 600.f}
+        , color::Toxic);
+}
 
 void MainWindow::init()
 {
@@ -31,6 +39,7 @@ void MainWindow::handleEvents()
 
 void MainWindow::draw()
 {
-    this->mainWindow.clear(sf::Color::Green);
+    this->mainWindow.clear(this->engineConfig->backColor);
+    this->mainWindow.draw(this->uiBoxes);
     this->mainWindow.display();
 }
