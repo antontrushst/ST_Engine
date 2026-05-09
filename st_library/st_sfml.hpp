@@ -10,56 +10,50 @@
 #include <numbers>
 #include <cmath>
 #include "st_system.hpp"
+#include "st_vector.hpp"
 
 namespace st_sfml
 {
 // ROUNDED QUADS ///////////////////////////////////////////////////////////////
-class RoundedQuads : public sf::Drawable
+class RoundedQuad : public sf::Drawable
 {
     sf::VertexArray verts;
-    int numberOfVerts;
+    sf::VertexArray innerVerts;
+    std::size_t numberOfVerts;
     float radius;
-    std::map<int, std::string> index_name;
+    int thickness;
 
     void draw(sf::RenderTarget &target,
         sf::RenderStates states) const override
     {
         target.draw(this->verts, states);
+        if(thickness)
+            target.draw(this->innerVerts, states);
     }
 
 public:
-    RoundedQuads(int numberOfQuads, int numberOfVerts = 30, float radius = 100.f)
-        : verts{sf::PrimitiveType::TriangleFan,
-            static_cast<unsigned int>(numberOfQuads * numberOfVerts)}
+    RoundedQuad(sf::Vector2f center, sf::Vector2f size, const sf::Color &color
+               ,int thickness = 0
+               ,const sf::Color &innerColor = sf::Color::Black
+               ,std::size_t numberOfVerts = 30, float radius = 100.f)
+        : verts{sf::PrimitiveType::TriangleFan, numberOfVerts}
+        , innerVerts{sf::PrimitiveType::TriangleFan
+            , numberOfVerts * !!thickness}
         , numberOfVerts{numberOfVerts}
         , radius{radius}
-    {}
-
-    void assign(int quadIndex, std::string name,
-        sf::Vector2f center, sf::Vector2f size, const sf::Color &color)
+        , thickness{thickness}
     {
-        // guard against out-of-reach assignment
-        if(quadIndex * this->numberOfVerts - (this->numberOfVerts - 1)
-            > this->verts.getVertexCount() - (this->numberOfVerts - 1))
+        if(numberOfVerts < 10)
         {
-            st::msg_err("ERROR: in file " + std::string(__FILE__) +
-                " on line " + std::to_string(__LINE__) +
-                " in function '" + std::string(__func__) +
-                "' an attempt to assign a quad out of range of existing" +
-                " sf::VertexArray.\nEntered quad index " +
-                std::to_string(quadIndex) + " whereas there are " +
-                std::to_string(this->getQuadsCount()) +
-                " quads in the container.\nTerminating.");
+            st::msg_err("ERROR: Trying to create a RoundedQuad");
+            st::msg_err(" with less than 10 vertices!");
             exit(-1);
         }
-
-        this->index_name[quadIndex] = name;
-
-        // placing vertecies
-        int firstIndex = quadIndex * this->numberOfVerts - this->numberOfVerts;
+        // placing vertices
         int cornerSwitch = 0;
         int circPointsSwitch = 1;
         double slice{2 * std::numbers::pi / (this->numberOfVerts - 6)};
+        // clockwise starting from bottom-right
         sf::Vector2f cornerCenters[4]{
             {static_cast<float>((center.x + size.x * 0.5f) - this->radius)
             ,static_cast<float>((center.y + size.y * 0.5f) - this->radius)},
@@ -74,24 +68,24 @@ public:
         {
             switch(i)
             {
-                case 0:{this->verts[firstIndex].position = center; break;}
-                case 1:{this->verts[firstIndex + i].position
+                case 0:{this->verts[i].position = center; break;}
+                case 1:{this->verts[i].position
                     = {cornerCenters[0].x + this->radius, cornerCenters[0].y};
                     break;}
-                case 8:{this->verts[firstIndex + i].position
+                case 8:{this->verts[i].position
                     = {cornerCenters[1].x, cornerCenters[1].y + this->radius};
                     cornerSwitch++; break;}
-                case 15:{this->verts[firstIndex + i].position
+                case 15:{this->verts[i].position
                     = {cornerCenters[2].x - this->radius, cornerCenters[2].y};
                     cornerSwitch++; break;}
-                case 22:{this->verts[firstIndex + i].position
+                case 22:{this->verts[i].position
                     = {cornerCenters[3].x, cornerCenters[3].y - this->radius};
                     cornerSwitch++; break;}
-                case 29:{this->verts[firstIndex + i].position
+                case 29:{this->verts[i].position
                     = {cornerCenters[0].x + this->radius, cornerCenters[0].y};
                     break;}
                 default:{double angle{slice * circPointsSwitch};
-                    this->verts[firstIndex + i].position
+                    this->verts[i].position
                         = {static_cast<float>(cornerCenters[cornerSwitch].x
                             + this->radius * std::cos(angle))
                         ,  static_cast<float>(cornerCenters[cornerSwitch].y
@@ -99,93 +93,55 @@ public:
                     circPointsSwitch++; break;}
             }
         }
-
-        for(int i = firstIndex; i < firstIndex + this->numberOfVerts; i++)
+        // set color
+        for(int i{0}; i < this->numberOfVerts; i++)
             this->verts[i].color = color;
-    }
 
-    int getQuadsCount() const {return this->index_name.size();}
-
-    std::map<int,std::string>::iterator findQuad(int index)
-    {
-        auto iter = this->index_name.find(index);
-        // guard against searching nonexisting quad
-        if(iter == this->index_name.end())
-            st::msg_warn("Warning: In file " + std::string(__FILE__) +
-                " on line " + std::to_string(__LINE__) +
-                " in function '" + std::string(__func__) +
-                "' a quad with index '" + std::to_string(index) +
-                "' was not found!");
-        return iter;
-    }
-
-    std::map<int,std::string>::iterator findQuad(std::string name)
-    {
-        auto iter = std::find_if(
-            this->index_name.begin(), this->index_name.end(),
-            [&name](const std::pair<int, std::string> &pair)
-                {return pair.second == name;});
-        // guard against searching nonexisting quad
-        if(iter == this->index_name.end())
-            st::msg_warn("Warning: In file " + std::string(__FILE__) +
-                " on line " + std::to_string(__LINE__) +
-                " in function '" + std::string(__func__) +
-                "' a quad with name '" + name + "' was not found!");
-        return iter;
-    }
-
-    std::optional<sf::Vector2f> getCenter(int index)
-    {
-        auto iter = this->findQuad(index);
-        if(iter != this->index_name.end())
-        {
-            return this->verts[iter->first * this->numberOfVerts
-                - this->numberOfVerts].position;
-        }
-        return std::nullopt;
-    }
-
-    std::optional<sf::Vector2f> getCenter(std::string name)
-    {
-        auto iter = this->findQuad(name);
-        if(iter != this->index_name.end())
-        {
-            return this->verts[iter->first * this->numberOfVerts
-                - this->numberOfVerts].position;
-        }
-        return std::nullopt;
-    }
-
-    void setCenter(int index, sf::Vector2f center)
-    {
-        auto iter = this->findQuad(index);
-        if(iter == this->index_name.end())
+        // create inner quad to make original quad appear as outline with
+        // thickness
+        if(thickness == 0)
             return;
 
-        int firstIndex = iter->first * this->numberOfVerts
-            - this->numberOfVerts;
-        sf::Vector2f position_difference(
-            center.x - this->verts[firstIndex].position.x,
-            center.y - this->verts[firstIndex].position.y);
-        for(int i = firstIndex; i < firstIndex + this->numberOfVerts; i++)
+        cornerSwitch = 0;
+        for(int i{0}; i < this->numberOfVerts; i++)
         {
-            this->verts[i].position.x += position_difference.x;
-            this->verts[i].position.y += position_difference.y;
+            this->innerVerts[i].color = innerColor;
+            if(i == 0)
+            {
+                this->innerVerts[i].position = center;
+                continue;
+            }
+            if(i == this->numberOfVerts - 1)
+            {
+                this->innerVerts[i].position = this->innerVerts[1].position;
+                break;
+            }
+
+            st::Vector2D offset{
+                cornerCenters[cornerSwitch].x - this->verts[i].position.x,
+                cornerCenters[cornerSwitch].y - this->verts[i].position.y};
+            offset = st::normalize(offset);
+            offset *= thickness;
+            this->innerVerts[i].position = {
+                this->verts[i].position.x + offset.x,
+                this->verts[i].position.y + offset.y};
+
+            if(i % ((numberOfVerts - 2) / 4) == false)
+                cornerSwitch++;
         }
     }
 
-    void setCenter(std::string name, sf::Vector2f center)
+    sf::Vector2f getCenter()
     {
-        auto iter = this->findQuad(name);
-        if(iter == this->index_name.end())
-            return;
+        return this->verts[0].position;
+    }
 
-        int firstIndex = iter->first * this->numberOfVerts
-            - this->numberOfVerts;
+    void setCenter(const sf::Vector2f &center)
+    {
         sf::Vector2f position_difference(
-            center.x - this->verts[firstIndex].position.x,
-            center.y - this->verts[firstIndex].position.y);
-        for(int i = firstIndex; i < firstIndex + this->numberOfVerts; i++)
+            center.x - this->verts[0].position.x,
+            center.y - this->verts[0].position.y);
+        for(int i{0}; i < this->numberOfVerts; i++)
         {
             this->verts[i].position.x += position_difference.x;
             this->verts[i].position.y += position_difference.y;

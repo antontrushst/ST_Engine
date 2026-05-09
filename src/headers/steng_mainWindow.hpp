@@ -11,7 +11,7 @@ class MainWindow
 {
     EngineConfig *engineConfig = nullptr;
     sf::RenderWindow mainWindow;
-    st_sfml::RoundedQuads uiBoxes;
+    st_sfml::RoundedQuad box;
     
 public:
     MainWindow(EngineConfig &engineConfig);

@@ -6,11 +6,8 @@ MainWindow::MainWindow(EngineConfig &engineConfig)
          {static_cast<unsigned int>(engineConfig.mainWindow_width)
         , static_cast<unsigned int>(engineConfig.mainWindow_height)})
         , "ST_Engine"))
-    , uiBoxes{1}
-{
-    this->uiBoxes.assign(1, "globalFrame", {640.f, 360.f}, {1000.f, 600.f}
-        , color::Toxic);
-}
+    , box{{640.f,360.f},{1000.f,600.f},color::Toxic,2}
+{}
 
 void MainWindow::init()
 {
@@ -40,6 +37,6 @@ void MainWindow::handleEvents()
 void MainWindow::draw()
 {
     this->mainWindow.clear(this->engineConfig->backColor);
-    this->mainWindow.draw(this->uiBoxes);
+    this->mainWindow.draw(this->box);
     this->mainWindow.display();
 }
