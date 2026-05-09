@@ -11,11 +11,22 @@ MainWindow::MainWindow(EngineConfig &engineConfig)
 
 void MainWindow::init()
 {
+    sf::View view1{{100.f,100.f},{100.f,100.f}};
+    view1.setViewport(sf::FloatRect({0.f,0.f},{.25f,.25f}));
+
     // MAIN LOOP
     while(this->mainWindow.isOpen())
     {
         this->handleEvents();
+
+        this->mainWindow.clear(this->engineConfig->backColor);
+        //---CLEARED SCREEN---////////////////////////////////
+        this->mainWindow.setView(this->mainWindow.getDefaultView());
         this->draw();
+        this->mainWindow.setView(view1);
+        this->draw();
+        //---READY TO DISPLAY---//////////////////////////////
+        this->mainWindow.display();
     }
 }
 
@@ -36,7 +47,5 @@ void MainWindow::handleEvents()
 
 void MainWindow::draw()
 {
-    this->mainWindow.clear(this->engineConfig->backColor);
     this->mainWindow.draw(this->box);
-    this->mainWindow.display();
 }

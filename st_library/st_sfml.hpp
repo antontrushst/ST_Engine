@@ -167,10 +167,10 @@ class Button : public sf::Drawable
     }
 
 public:
-    Button(std::string name, std::filesystem::path imagePath,
+    Button(std::string name, std::filesystem::path iconPath,
         sf::Vector2f position, sf::Vector2f size)
         : name{name}
-        , texture{new sf::Texture{imagePath}}
+        , texture{new sf::Texture{iconPath}}
         , sprite{*this->texture}
         , collider{position, size}
         , collider_visuals{sf::VertexArray{sf::PrimitiveType::LineStrip, 5}}
