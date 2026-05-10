@@ -6,13 +6,13 @@ MainWindow::MainWindow(EngineConfig &engineConfig)
          {static_cast<unsigned int>(engineConfig.mainWindow_width)
         , static_cast<unsigned int>(engineConfig.mainWindow_height)})
         , "ST_Engine"))
-    , box{{640.f,360.f},{1000.f,600.f},color::Toxic,2}
+    , UIQuads{1}
 {}
 
 void MainWindow::init()
 {
-    sf::View view1{{100.f,100.f},{100.f,100.f}};
-    view1.setViewport(sf::FloatRect({0.f,0.f},{.25f,.25f}));
+
+    UIQuads.assign(1, "test", {100.f,100.f}, {300.f, 100.f}, color::Milk);
 
     // MAIN LOOP
     while(this->mainWindow.isOpen())
@@ -21,10 +21,12 @@ void MainWindow::init()
 
         this->mainWindow.clear(this->engineConfig->backColor);
         //---CLEARED SCREEN---////////////////////////////////
-        this->mainWindow.setView(this->mainWindow.getDefaultView());
+
+//        this->mainWindow.setView(this->mainWindow.getDefaultView());
         this->draw();
-        this->mainWindow.setView(view1);
-        this->draw();
+//        this->mainWindow.setView(view1);
+//        this->draw();
+
         //---READY TO DISPLAY---//////////////////////////////
         this->mainWindow.display();
     }
@@ -47,5 +49,5 @@ void MainWindow::handleEvents()
 
 void MainWindow::draw()
 {
-    this->mainWindow.draw(this->box);
+    this->mainWindow.draw(this->UIQuads);
 }
