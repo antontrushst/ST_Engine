@@ -12,6 +12,7 @@ class MainWindow
     EngineConfig *engineConfig = nullptr;
     sf::RenderWindow mainWindow;
     st_sfml::Quads UIQuads;
+    std::vector<st_sfml::Button> buttons;
     
 public:
     MainWindow(EngineConfig &engineConfig);

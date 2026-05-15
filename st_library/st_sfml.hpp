@@ -157,33 +157,33 @@ class Button : public sf::Drawable
     sf::Texture *texture = nullptr;
     sf::Sprite sprite;
     sf::FloatRect collider;
-    sf::VertexArray collider_visuals;
+    sf::VertexArray shape;
 
-    inline void draw(sf::RenderTarget &target,
-        sf::RenderStates states) const override
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override
     {
+        target.draw(this->shape, states);
         target.draw(this->sprite, states);
-        if(this->show_collider)
-            target.draw(this->collider_visuals, states);
     }
 
 public:
     Button(std::string name, std::filesystem::path iconPath,
-        sf::Vector2f position, sf::Vector2f size)
+        sf::Vector2f position, sf::Vector2f size,
+        const sf::Color &color = sf::Color::Magenta)
         : name{name}
         , texture{new sf::Texture{iconPath}}
         , sprite{*this->texture}
         , collider{position, size}
-        , collider_visuals{sf::VertexArray{sf::PrimitiveType::LineStrip, 5}}
+        , shape{sf::VertexArray{sf::PrimitiveType::LineStrip, 5}}
     {
         this->sprite.setPosition(position);
-        // compose collider
-        this->collider_visuals[0].position = position;
-        this->collider_visuals[1].position = {position.x + size.x, position.y};
-        this->collider_visuals[2].position =
-            {position.x + size.x, position.y + size.y};
-        this->collider_visuals[3].position = {position.x, position.y + size.y};
-        this->collider_visuals[4].position = position;
+        // compose collider and shape
+        this->shape[0].position = position;
+        this->shape[1].position = {position.x + size.x, position.y};
+        this->shape[2].position = {position.x + size.x, position.y + size.y};
+        this->shape[3].position = {position.x, position.y + size.y};
+        this->shape[4].position = position;
+        for(auto &v : this->shape)
+            v.color = color;
         // set texture size
         float scaleFactor_x = size.x / float(this->texture->getSize().x);
         float scaleFactor_y = size.y / float(this->texture->getSize().y);
@@ -194,33 +194,43 @@ public:
         delete this->texture;
     }
 
-    inline void setColor(sf::Color color) {this->sprite.setColor(color);}
-    bool show_collider = false;
-
-    inline void setColliderColor(sf::Color color)
+    Button& setSpriteColor(const sf::Color &color)
     {
-        for(int i{0}; i < this->collider_visuals.getVertexCount(); i++)
-            this->collider_visuals[i].color = color;
+        this->sprite.setColor(color);
+        return *this;
     }
 
-    inline bool contains(sf::Vector2i point_position) const
+    Button& setColor(const sf::Color &color)
+    {
+        for(int i{0}; i < this->shape.getVertexCount(); i++)
+            this->shape[i].color = color;
+        return *this;
+    }
+
+    bool contains(sf::Vector2i point_position) const
     {
         return this->collider.contains({(float)point_position.x,
             (float)point_position.y});
     }
 
-    inline void setPosition(sf::Vector2f position)
+    void setPosition(sf::Vector2f position)
     {
         sf::Vector2f position_diff = position - this->collider.position;
         this->sprite.setPosition(position);
         this->collider.position = position;
-        for(int i{0}; i < this->collider_visuals.getVertexCount(); i++)
+        for(int i{0}; i < this->shape.getVertexCount(); i++)
         {
-            this->collider_visuals[i].position += position_diff;
+            this->shape[i].position += position_diff;
         }
     }
 
-    inline sf::Vector2f getPosition() {return this->sprite.getPosition();}
+    sf::Vector2f getPosition() {return this->sprite.getPosition();}
+};
+
+struct Buttons
+{
+    std::vector<Button> buttons;
+
 };
 // QUADS ///////////////////////////////////////////////////////////////////////
 class Quads : public sf::Drawable
