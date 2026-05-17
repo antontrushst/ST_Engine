@@ -149,12 +149,32 @@ public:
         }
     }
 };
+// TEXTURES ////////////////////////////////////////////////////////////////////
+struct Textures : public sf::Texture
+{
+    const std::vector<sf::Texture> textures;
 
+    Textures(const std::string &path)
+        : textures([&]()
+            {
+                namespace fs = std::filesystem;
+                std::vector<sf::Texture> temp;
+                for(const auto &image : fs::directory_iterator(path))
+                {
+                    sf::Texture texture{image.path()};
+                    temp.push_back(texture);
+                }
+                return temp;
+            }())
+    {}
+};
 // BUTTON //////////////////////////////////////////////////////////////////////
 class Button : public sf::Drawable
 {
+    friend class Buttons;
+
     std::string name;
-    sf::Texture *texture = nullptr;
+    const sf::Texture *texture = nullptr;
     sf::Sprite sprite;
     sf::FloatRect collider;
     sf::VertexArray shape;
@@ -166,32 +186,29 @@ class Button : public sf::Drawable
     }
 
 public:
-    Button(std::string name, std::filesystem::path iconPath,
+    Button(std::string name, const sf::Texture &icon,
         sf::Vector2f position, sf::Vector2f size,
         const sf::Color &color = sf::Color::Magenta)
         : name{name}
-        , texture{new sf::Texture{iconPath}}
+        , texture(&icon)
         , sprite{*this->texture}
         , collider{position, size}
-        , shape{sf::VertexArray{sf::PrimitiveType::LineStrip, 5}}
+        , shape{sf::VertexArray{sf::PrimitiveType::Triangles, 6}}
     {
         this->sprite.setPosition(position);
         // compose collider and shape
         this->shape[0].position = position;
         this->shape[1].position = {position.x + size.x, position.y};
         this->shape[2].position = {position.x + size.x, position.y + size.y};
-        this->shape[3].position = {position.x, position.y + size.y};
-        this->shape[4].position = position;
-        for(auto &v : this->shape)
-            v.color = color;
+        this->shape[3].position = position;
+        this->shape[4].position = {position.x, position.y + size.y};
+        this->shape[5].position = {position.x + size.x, position.y + size.y};
+        for(int i{0}; i < this->shape.getVertexCount(); i++)
+            this->shape[i].color = color;
         // set texture size
         float scaleFactor_x = size.x / float(this->texture->getSize().x);
         float scaleFactor_y = size.y / float(this->texture->getSize().y);
         this->sprite.scale({scaleFactor_x, scaleFactor_y});
-    }
-    ~Button()
-    {
-        delete this->texture;
     }
 
     Button& setSpriteColor(const sf::Color &color)
@@ -230,7 +247,20 @@ public:
 struct Buttons
 {
     std::vector<Button> buttons;
+    Buttons(const std::vector<Button> &buttons)
+        : buttons{buttons}
+    {}
 
+    Button& get(const std::string &name)
+    {
+        for(Button& button : this->buttons)
+            if(button.name == name)
+                return button;
+        st::msg_err("ERROR: couldn't find the button " + name);
+        exit(-1);
+    }
+
+    Button& operator [](int index) {return this->buttons[index];}
 };
 // QUADS ///////////////////////////////////////////////////////////////////////
 class Quads : public sf::Drawable

@@ -8,6 +8,7 @@
 
 #include "st_system.hpp"
 #include "steng_colors.hpp"
+#include "st_sfml.hpp"
 
 struct EngineConfig
 {
@@ -17,6 +18,8 @@ struct EngineConfig
     int mainWindow_minHeight = 300;
     sf::Font font{std::string{
         st::getThisProgramLocation() + "fonts\\Power_Pixel-7.ttf"}};
+    st_sfml::Textures buttonIcons{std::string{
+        st::getThisProgramLocation() + "graphics"}};
     sf::Color mainColor = color::Toxic;
     sf::Color secondaryColor = color::LightGrey;
     sf::Color backColor = color::SoftBlack;

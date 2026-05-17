@@ -7,6 +7,9 @@ MainWindow::MainWindow(EngineConfig &engineConfig)
         , static_cast<unsigned int>(engineConfig.mainWindow_height)})
         , "ST_Engine"))
     , UIQuads{1}
+    , buttons{std::vector<st_sfml::Button>{{"ping",
+        engineConfig.buttonIcons.textures[0],
+        {100.f,100.f}, {100.f,100.f}}}}
 {}
 
 void MainWindow::init()
@@ -50,4 +53,6 @@ void MainWindow::handleEvents()
 void MainWindow::draw()
 {
     this->mainWindow.draw(this->UIQuads);
+    for(int i{0}; i < this->buttons.buttons.size(); i++)
+        this->mainWindow.draw(this->buttons[i]);
 }
