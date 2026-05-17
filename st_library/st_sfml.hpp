@@ -226,7 +226,8 @@ class Button : public sf::Drawable
     friend class Buttons;
 
     std::string name;
-    const sf::Texture *texture = nullptr;
+    sf::Text text;
+    const sf::Texture *texture;
     sf::Sprite sprite;
     sf::FloatRect collider;
     sf::VertexArray shape;
@@ -235,14 +236,22 @@ class Button : public sf::Drawable
     {
         target.draw(this->shape, states);
         target.draw(this->sprite, states);
+        target.draw(this->text, states);
     }
 
 public:
-    Button(std::string name, const sf::Texture &icon,
-        sf::Vector2f position, sf::Vector2f size,
-        const sf::Color &color = sf::Color::Magenta)
+    Button(const std::string  &name,
+           const sf::Vector2f &position,
+           const sf::Vector2f &size,
+           const sf::Font     &font,
+           const std::string  &text      = "",
+           const unsigned int &textSize  = 10,
+           const sf::Color    &textColor = sf::Color::Black,
+           const sf::Texture  *icon      = new sf::Texture{},
+           const sf::Color    &color     = sf::Color::Magenta)
         : name{name}
-        , texture(&icon)
+        , text{font, text, textSize}
+        , texture(icon)
         , sprite{*this->texture}
         , collider{position, size}
         , shape{sf::VertexArray{sf::PrimitiveType::Triangles, 6}}
@@ -261,6 +270,9 @@ public:
         float scaleFactor_x = size.x / float(this->texture->getSize().x);
         float scaleFactor_y = size.y / float(this->texture->getSize().y);
         this->sprite.scale({scaleFactor_x, scaleFactor_y});
+        // set text color
+        if(!this->text.getString().isEmpty())
+            this->text.setFillColor(textColor);
     }
 
     Button& setSpriteColor(const sf::Color &color)
