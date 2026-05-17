@@ -1,5 +1,6 @@
 #include "steng_config.hpp"
 #include "steng_mainWindow.hpp"
+#include "st_system.hpp"
 
 int main()
 {

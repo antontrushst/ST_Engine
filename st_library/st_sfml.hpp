@@ -1,6 +1,10 @@
 #ifndef ST_SFML_HPP
 #define ST_SFML_HPP
 
+// This part of ST_Library is designed to compliment SFML in a way of providing
+// custom shapes and containers that are not present in SFML itself, but based
+// on the classes from this beautiful library.
+
 #include <SFML\Graphics.hpp>
 #include <string>
 #include <vector>
@@ -153,21 +157,69 @@ public:
 struct Textures : public sf::Texture
 {
     const std::vector<sf::Texture> textures;
+    const std::vector<std::string> names;
 
-    Textures(const std::string &path)
-        : textures([&]()
+    Textures(const std::string &folderPath)
+        : textures([&]() -> std::vector<sf::Texture>
             {
                 namespace fs = std::filesystem;
                 std::vector<sf::Texture> temp;
-                for(const auto &image : fs::directory_iterator(path))
+                for(const auto &image : fs::directory_iterator(folderPath))
                 {
+                    std::string extension{image.path().string()};
+                    extension = extension.substr(extension.find_last_of('.'));
+                    if(extension != ".png" && extension != ".jpg")
+                        continue;
                     sf::Texture texture{image.path()};
                     temp.push_back(texture);
                 }
                 return temp;
             }())
+        , names{[&]() -> std::vector<std::string>
+            {
+                namespace fs = std::filesystem;
+                std::vector<std::string> temp;
+                for(const auto &image : fs::directory_iterator(folderPath))
+                {
+                    std::string name{image.path().string()};
+                    name = name.substr(name.find_last_of("\\") + 1);
+                    std::string extension{name.substr(name.find_last_of('.'))};
+                    if(extension != ".png" && extension != ".jpg")
+                        continue;
+                    temp.push_back(name);
+                }
+                return temp;
+            }()}
     {}
+
+    const sf::Texture& operator [](const int &index)
+    {
+        return this->textures[index];
+    }
+
+    const sf::Texture& operator [](const std::string &name)
+    {
+        for(std::size_t i{0}; i < this->names.size(); i++)
+        {
+            std::string noextName =
+                this->names[i].substr(0, this->names[i].find_last_of('.'));
+            if(name == noextName)
+                return this->textures[i];
+        }
+        st::msg_err({"Error: no texture with name " + name + "!"});
+        exit(-1);
+    }
 };
+
+inline void print(const Textures &textures)
+{
+    std::cout << "Textures:\n";
+    for(size_t i{0}; i < textures.names.size(); i++)
+    {
+        std::cout << "\t" << i << ". " << textures.names[i] << "\n";
+    }
+    std::cout << "end of Textures." << std::endl;
+}
 // BUTTON //////////////////////////////////////////////////////////////////////
 class Button : public sf::Drawable
 {

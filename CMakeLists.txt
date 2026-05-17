@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME} src/steng_main.cpp
     src/steng_mainWindow.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src/headers" "st_library/")
-target_link_options(${PROJECT_NAME} PRIVATE -mwindows)
+#uncomment for no-console execution on Windows
+#target_link_options(${PROJECT_NAME} PRIVATE -mwindows)
 target_link_libraries(${PROJECT_NAME} PRIVATE SFML::Graphics -l:libwinpthread.a)
 target_compile_definitions(${PROJECT_NAME} PRIVATE SFML_STATIC)

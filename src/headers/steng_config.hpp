@@ -16,6 +16,7 @@ struct EngineConfig
     int mainWindow_height = 720;
     int mainWindow_minWidth = 300;
     int mainWindow_minHeight = 300;
+    int framerate = 60;
     sf::Font font{std::string{
         st::getThisProgramLocation() + "fonts\\Power_Pixel-7.ttf"}};
     st_sfml::Textures buttonIcons{std::string{

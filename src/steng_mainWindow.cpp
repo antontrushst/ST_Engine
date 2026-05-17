@@ -8,9 +8,12 @@ MainWindow::MainWindow(EngineConfig &engineConfig)
         , "ST_Engine"))
     , UIQuads{1}
     , buttons{std::vector<st_sfml::Button>{{"ping",
-        engineConfig.buttonIcons.textures[0],
+        engineConfig.buttonIcons["test"],
         {100.f,100.f}, {100.f,100.f}}}}
-{}
+{
+    this->mainWindow.setFramerateLimit(engineConfig.framerate);
+    st_sfml::print(engineConfig.buttonIcons);
+}
 
 void MainWindow::init()
 {
