@@ -6,20 +6,18 @@ MainWindow::MainWindow(EngineConfig &engineConfig)
          {static_cast<unsigned int>(engineConfig.mainWindow_width)
         , static_cast<unsigned int>(engineConfig.mainWindow_height)})
         , "ST_Engine"))
-    , UIQuads{1}
+    // initialize buttons here--------------------------------------------------
     , buttons{std::vector<st_sfml::Button>{{"ping",
-//        engineConfig.buttonIcons["test"],
-        {100.f,100.f}, {100.f,100.f},
-        engineConfig.font, "!test!", 10, sf::Color::White}}}
+        {engineConfig.mainWindow_width/2.f, engineConfig.mainWindow_height/2.f},
+        {400.f,50.f},
+        engineConfig.font, "new", 32, engineConfig.backColor,
+        engineConfig.secondaryColor}}}
 {
     this->mainWindow.setFramerateLimit(engineConfig.framerate);
 }
 
 void MainWindow::init()
 {
-
-    UIQuads.assign(1, "test", {100.f,100.f}, {300.f, 100.f}, color::Milk);
-
     // MAIN LOOP
     while(this->mainWindow.isOpen())
     {
@@ -55,7 +53,6 @@ void MainWindow::handleEvents()
 
 void MainWindow::draw()
 {
-    this->mainWindow.draw(this->UIQuads);
     for(int i{0}; i < this->buttons.buttons.size(); i++)
         this->mainWindow.draw(this->buttons[i]);
 }

@@ -226,17 +226,19 @@ class Button : public sf::Drawable
     friend class Buttons;
 
     std::string name;
-    sf::Text text;
-    const sf::Texture *texture;
-    sf::Sprite sprite;
+    std::optional<sf::Text> text;
+    std::optional<const sf::Texture*> texture;
+    std::optional<sf::Sprite> sprite;
     sf::FloatRect collider;
     sf::VertexArray shape;
 
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override
     {
         target.draw(this->shape, states);
-        target.draw(this->sprite, states);
-        target.draw(this->text, states);
+        if(this->text)
+            target.draw(this->text.value(), states);
+        else
+            target.draw(this->sprite.value(), states);
     }
 
 public:
@@ -245,40 +247,86 @@ public:
            const sf::Vector2f &size,
            const sf::Font     &font,
            const std::string  &text      = "",
-           const unsigned int &textSize  = 10,
+           const unsigned int &textSize  = 0,
            const sf::Color    &textColor = sf::Color::Black,
-           const sf::Texture  *icon      = new sf::Texture{},
            const sf::Color    &color     = sf::Color::Magenta)
         : name{name}
-        , text{font, text, textSize}
-        , texture(icon)
-        , sprite{*this->texture}
+        , text{{font, text, textSize}}
         , collider{position, size}
         , shape{sf::VertexArray{sf::PrimitiveType::Triangles, 6}}
     {
-        this->sprite.setPosition(position);
-        // compose collider and shape
-        this->shape[0].position = position;
-        this->shape[1].position = {position.x + size.x, position.y};
-        this->shape[2].position = {position.x + size.x, position.y + size.y};
-        this->shape[3].position = position;
-        this->shape[4].position = {position.x, position.y + size.y};
-        this->shape[5].position = {position.x + size.x, position.y + size.y};
+        // compose collider-shape
+        this->shape[0].position = position - size / 2.f;
+        this->shape[1].position = {position.x + size.x / 2.f,
+            position.y - size.y / 2.f};
+        this->shape[2].position = {position.x + size.x / 2.f,
+            position.y + size.y / 2.f};
+        this->shape[3].position = this->shape[0].position;
+        this->shape[4].position = {position.x - size.x / 2.f,
+            position.y + size.y / 2.f};
+        this->shape[5].position = this->shape[2].position;
+        for(int i{0}; i < this->shape.getVertexCount(); i++)
+            this->shape[i].color = color;
+
+        // set text color and position
+        if(this->text->getString().isEmpty())
+            return;
+
+        this->text->setFillColor(textColor);
+        sf::Vector2f centeredOrigin =
+            {this->text->getGlobalBounds().size / 2.f +
+                this->text->getLocalBounds().position};
+        this->text->setOrigin(
+            {std::round(centeredOrigin.x), std::round(centeredOrigin.y)});
+        this->text->setPosition(position);
+    }
+
+    Button(const std::string  &name,
+           const sf::Vector2f &position,
+           const sf::Vector2f &size,
+           const sf::Texture  *icon,
+           const sf::Color    &color     = sf::Color::Magenta)
+        : name{name}
+        , texture(icon)
+        , sprite{*this->texture.value()}
+        , collider{position - size / 2.f, size}
+        , shape{sf::VertexArray{sf::PrimitiveType::Triangles, 6}}
+    {
+        // compose collider-shape
+        this->shape[0].position = position - size / 2.f;
+        this->shape[1].position = {position.x + size.x / 2.f,
+            position.y - size.y / 2.f};
+        this->shape[2].position = {position.x + size.x / 2.f,
+            position.y + size.y / 2.f};
+        this->shape[3].position = this->shape[0].position;
+        this->shape[4].position = {position.x - size.x / 2.f,
+            position.y + size.y / 2.f};
+        this->shape[5].position = this->shape[2].position;
         for(int i{0}; i < this->shape.getVertexCount(); i++)
             this->shape[i].color = color;
         // set texture size
-        float scaleFactor_x = size.x / float(this->texture->getSize().x);
-        float scaleFactor_y = size.y / float(this->texture->getSize().y);
-        this->sprite.scale({scaleFactor_x, scaleFactor_y});
-        // set text color
-        if(!this->text.getString().isEmpty())
-            this->text.setFillColor(textColor);
+        sf::Vector2f centeredOrigin =
+            {this->sprite->getGlobalBounds().size / 2.f +
+                this->sprite->getLocalBounds().position};
+        this->sprite->setOrigin(
+            {std::round(centeredOrigin.x), std::round(centeredOrigin.y)});
+        this->sprite->setPosition(position);
+        float scaleFactor_x = size.x /
+            float(this->texture.value()->getSize().x);
+        float scaleFactor_y = size.y /
+            float(this->texture.value()->getSize().y);
+        this->sprite->scale({scaleFactor_x, scaleFactor_y});
     }
 
     Button& setSpriteColor(const sf::Color &color)
     {
-        this->sprite.setColor(color);
-        return *this;
+        if(this->sprite)
+        {
+            this->sprite->setColor(color);
+            return *this;
+        }
+        st::msg_err("ERROR: Trying to set sprite on text button!");
+        exit(-1);
     }
 
     Button& setColor(const sf::Color &color)
@@ -296,16 +344,20 @@ public:
 
     void setPosition(sf::Vector2f position)
     {
-        sf::Vector2f position_diff = position - this->collider.position;
-        this->sprite.setPosition(position);
-        this->collider.position = position;
+        sf::Vector2f position_diff = position -
+            this->collider.position;
+        this->collider.position += position_diff;
         for(int i{0}; i < this->shape.getVertexCount(); i++)
         {
             this->shape[i].position += position_diff;
         }
+        if(this->sprite)
+            this->sprite->setPosition(position);
+        else
+            this->text->setPosition(this->text->getPosition() + position_diff);
     }
 
-    sf::Vector2f getPosition() {return this->sprite.getPosition();}
+    sf::Vector2f getPosition() {return this->shape[0].position;}
 };
 
 struct Buttons

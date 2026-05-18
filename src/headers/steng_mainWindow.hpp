@@ -11,7 +11,7 @@ class MainWindow
 {
     EngineConfig *engineConfig = nullptr;
     sf::RenderWindow mainWindow;
-    st_sfml::Quads UIQuads;
+    //st_sfml::Quads UIQuads;
     st_sfml::Buttons buttons;
     
 public:

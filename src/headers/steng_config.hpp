@@ -18,12 +18,14 @@ struct EngineConfig
     int mainWindow_minHeight = 300;
     int framerate = 60;
     sf::Font font{std::string{
-        st::getThisProgramLocation() + "fonts\\Power_Pixel-7.ttf"}};
+        st::getThisProgramLocation() + "fonts\\Proletarsk.ttf"}};
+    sf::Font titleFont{std::string{
+        st::getThisProgramLocation() + "fonts\\logo_2K12.ttf"}};
     st_sfml::Textures buttonIcons{std::string{
         st::getThisProgramLocation() + "graphics"}};
     sf::Color mainColor = color::Toxic;
-    sf::Color secondaryColor = color::LightGrey;
-    sf::Color backColor = color::SoftBlack;
+    sf::Color secondaryColor = color::SoftBlack;
+    sf::Color backColor = color::Milk;
 };
 
 inline EngineConfig loadEngineConfig(const std::string &path)
