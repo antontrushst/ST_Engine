@@ -6,20 +6,20 @@
 
 #include "st_sfml.hpp"
 #include "steng_config.hpp"
+#include "steng_screen_greet.hpp"
 
 class MainWindow
 {
-    EngineConfig *engineConfig = nullptr;
+    EngineConfig *engineConfig;
     sf::RenderWindow mainWindow;
-    //st_sfml::Quads UIQuads;
-    st_sfml::Buttons buttons;
+    st_sfml::Textures textures;
+    Screen_Greet screen_greet;
     
 public:
     MainWindow(EngineConfig &engineConfig);
 
     void init();
     void handleEvents();
-    void draw();
 };
 
 #endif

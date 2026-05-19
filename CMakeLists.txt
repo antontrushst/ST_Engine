@@ -23,7 +23,8 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(${PROJECT_NAME} src/steng_main.cpp
-    src/steng_mainWindow.cpp)
+    src/steng_mainWindow.cpp
+    src/steng_screen_greet.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src/headers" "st_library/")
 #uncomment for no-console execution on Windows

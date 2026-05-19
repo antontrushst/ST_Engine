@@ -3,15 +3,11 @@
 MainWindow::MainWindow(EngineConfig &engineConfig)
     : engineConfig{&engineConfig}
     , mainWindow(sf::RenderWindow(sf::VideoMode(
-         {static_cast<unsigned int>(engineConfig.mainWindow_width)
-        , static_cast<unsigned int>(engineConfig.mainWindow_height)})
+        {static_cast<unsigned int>(engineConfig.mainWindow_width)
+            , static_cast<unsigned int>(engineConfig.mainWindow_height)})
         , "ST_Engine"))
-    // initialize buttons here--------------------------------------------------
-    , buttons{std::vector<st_sfml::Button>{{"ping",
-        {engineConfig.mainWindow_width/2.f, engineConfig.mainWindow_height/2.f},
-        {400.f,50.f},
-        engineConfig.font, "new", 32, engineConfig.backColor,
-        engineConfig.secondaryColor}}}
+    , textures{{st::getThisProgramLocation() + "graphics"}}
+    , screen_greet{engineConfig, this->textures["test"]}
 {
     this->mainWindow.setFramerateLimit(engineConfig.framerate);
 }
@@ -24,14 +20,9 @@ void MainWindow::init()
         this->handleEvents();
 
         this->mainWindow.clear(this->engineConfig->backColor);
-        //---CLEARED SCREEN---////////////////////////////////
-
-//        this->mainWindow.setView(this->mainWindow.getDefaultView());
-        this->draw();
-//        this->mainWindow.setView(view1);
-//        this->draw();
-
-        //---READY TO DISPLAY---//////////////////////////////
+    //  CLEARED SCREEN  ////////////////////////////////////////////////////////
+        this->screen_greet.draw(this->mainWindow);
+    //  READY TO DISPLAY  //////////////////////////////////////////////////////
         this->mainWindow.display();
     }
 }
@@ -51,8 +42,3 @@ void MainWindow::handleEvents()
     }
 }
 
-void MainWindow::draw()
-{
-    for(int i{0}; i < this->buttons.buttons.size(); i++)
-        this->mainWindow.draw(this->buttons[i]);
-}
