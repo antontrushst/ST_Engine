@@ -10,13 +10,12 @@
 
 class MainWindow
 {
-    EngineConfig *engineConfig;
     sf::RenderWindow mainWindow;
     st_sfml::Textures textures;
     Screen_Greet screen_greet;
     
 public:
-    MainWindow(EngineConfig &engineConfig);
+    MainWindow();
 
     void init();
     void handleEvents();

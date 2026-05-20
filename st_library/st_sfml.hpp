@@ -229,7 +229,6 @@ class Button : public sf::Drawable
     std::optional<sf::Text> text;
     std::optional<const sf::Texture*> texture;
     std::optional<sf::Sprite> sprite;
-    sf::FloatRect collider;
     sf::VertexArray shape;
 
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override
@@ -252,7 +251,6 @@ public:
            const sf::Color    &color     = sf::Color::Magenta)
         : name{name}
         , text{{font, text, textSize}}
-        , collider{position, size}
         , shape{sf::VertexArray{sf::PrimitiveType::Triangles, 6}}
     {
         // compose collider-shape
@@ -289,7 +287,6 @@ public:
         : name{name}
         , texture(icon)
         , sprite{*this->texture.value()}
-        , collider{position - size / 2.f, size}
         , shape{sf::VertexArray{sf::PrimitiveType::Triangles, 6}}
     {
         // compose collider-shape
@@ -336,17 +333,19 @@ public:
         return *this;
     }
 
-    bool contains(sf::Vector2i point_position) const
+    bool contains(sf::Vector2f point_position) const
     {
-        return this->collider.contains({(float)point_position.x,
-            (float)point_position.y});
+        bool hor_overlap{point_position.x >= this->shape[0].position.x &&
+            point_position.x <= this->shape[2].position.x};
+        bool ver_overlap{point_position.y >= this->shape[0].position.y &&
+            point_position.y <= this->shape[2].position.y};
+        return hor_overlap && ver_overlap;
     }
 
     void setPosition(sf::Vector2f position)
     {
-        sf::Vector2f position_diff = position -
-            this->collider.position;
-        this->collider.position += position_diff;
+        sf::Vector2f position_diff = position - (this->shape[0].position +
+            (this->shape[1].position - this->shape[0].position) / 2.f);
         for(int i{0}; i < this->shape.getVertexCount(); i++)
         {
             this->shape[i].position += position_diff;
@@ -367,7 +366,7 @@ struct Buttons
         : buttons{buttons}
     {}
 
-    Button& get(const std::string &name)
+    Button& operator [](const std::string &name)
     {
         for(Button& button : this->buttons)
             if(button.name == name)

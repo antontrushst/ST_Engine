@@ -4,10 +4,10 @@
 
 int main()
 {
-    EngineConfig engineConfig{
+    EngineConfig::getInstance().
         loadEngineConfig(std::string{st::getThisProgramLocation()
-            + "steng_config.txt"})};
-    MainWindow mainWindow{engineConfig};
+            + "steng_config.txt"});
+    MainWindow mainWindow;
     mainWindow.init();
 
     return 0;

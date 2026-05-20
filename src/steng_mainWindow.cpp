@@ -1,15 +1,15 @@
 #include "steng_mainWindow.hpp"
 
-MainWindow::MainWindow(EngineConfig &engineConfig)
-    : engineConfig{&engineConfig}
-    , mainWindow(sf::RenderWindow(sf::VideoMode(
-        {static_cast<unsigned int>(engineConfig.mainWindow_width)
-            , static_cast<unsigned int>(engineConfig.mainWindow_height)})
+MainWindow::MainWindow()
+    : mainWindow(sf::RenderWindow(sf::VideoMode(
+        {static_cast<unsigned int>(EngineConfig::getInstance().mainWindow_width)
+            , static_cast<unsigned int>(
+                EngineConfig::getInstance().mainWindow_height)})
         , "ST_Engine"))
     , textures{{st::getThisProgramLocation() + "graphics"}}
-    , screen_greet{engineConfig, this->textures["test"]}
+    , screen_greet{this->textures["lagnia_sketch_transp"]}
 {
-    this->mainWindow.setFramerateLimit(engineConfig.framerate);
+    this->mainWindow.setFramerateLimit(EngineConfig::getInstance().framerate);
 }
 
 void MainWindow::init()
@@ -19,7 +19,7 @@ void MainWindow::init()
     {
         this->handleEvents();
 
-        this->mainWindow.clear(this->engineConfig->backColor);
+        this->mainWindow.clear(EngineConfig::getInstance().backColor);
     //  CLEARED SCREEN  ////////////////////////////////////////////////////////
         this->screen_greet.draw(this->mainWindow);
     //  READY TO DISPLAY  //////////////////////////////////////////////////////
@@ -39,6 +39,7 @@ void MainWindow::handleEvents()
         {
 
         }
+
+        this->screen_greet.handleEvents(event, this->mainWindow);
     }
 }
-

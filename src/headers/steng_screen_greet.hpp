@@ -12,9 +12,10 @@ class Screen_Greet
     sf::Sprite       LagniaImage;
     st_sfml::Buttons buttons;
 public:
-    Screen_Greet(const EngineConfig &config, const sf::Texture &image);
+    Screen_Greet(const sf::Texture &image);
 
-    Screen_Greet& handleEvents(const auto &event);
+    Screen_Greet& handleEvents(const std::optional<sf::Event> &event,
+        const sf::RenderWindow &window);
     Screen_Greet& draw(sf::RenderWindow &window);
 };
 
