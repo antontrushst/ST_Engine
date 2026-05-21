@@ -38,13 +38,19 @@ namespace st
             GetConsoleScreenBufferInfo(hConsole, &cbinfo);
             int originalColor = cbinfo.wAttributes;
             SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            std::cout << "ERROR in file " << __FILE__ <<
+            " in function " << __func__ <<
+            " on line " << std::to_string(__LINE__) << "!\n";
             std::cout << text << std::endl;
             SetConsoleTextAttribute(hConsole, originalColor);
             return;
 
         #endif
 
-        std::cout << "\033[31m" << text << "\033[0m" << std::endl;
+        std::cout << "\033[31m" << "ERROR in file " << __FILE__ <<
+            " in function " << __func__ <<
+            " on line " << std::to_string(__LINE__) << "!\n" <<
+            text << "\033[0m" << std::endl;
     }
 
     inline void msg_warn(const std::string text)
@@ -56,13 +62,19 @@ namespace st
             GetConsoleScreenBufferInfo(hConsole, &cbinfo);
             int originalColor = cbinfo.wAttributes;
             SetConsoleTextAttribute(hConsole, 6);
+            std::cout << "Warning in file " << __FILE__ <<
+            " in function " << __func__ <<
+            " on line " << std::to_string(__LINE__) << "!\n";
             std::cout << text << std::endl;
             SetConsoleTextAttribute(hConsole, originalColor);
             return;
 
         #endif
 
-        std::cout << "\033[33m" << text << "\033[0m" << std::endl;
+        std::cout << "\033[33m" << "Warning in file " << __FILE__ <<
+            " in function " << __func__ <<
+            " on line " << std::to_string(__LINE__) << "!\n" <<
+            text << "\033[0m" << std::endl;
     }
     // GET CURRENT PROGRAM LOCATION ////////////////////////////////////////////
     inline std::string getThisProgramLocation()
