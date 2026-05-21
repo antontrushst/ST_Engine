@@ -17,6 +17,7 @@ public:
     Screen_Greet& handleEvents(const std::optional<sf::Event> &event,
         const sf::RenderWindow &window);
     Screen_Greet& draw(sf::RenderWindow &window);
+    Screen_Greet& updatePositions(const sf::RenderWindow &window);
 };
 
 #endif

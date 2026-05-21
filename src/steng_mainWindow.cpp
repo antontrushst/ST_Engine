@@ -37,7 +37,11 @@ void MainWindow::handleEvents()
         }
         else if(const auto* resized = event->getIf<sf::Event::Resized>())
         {
+            sf::FloatRect visibleArea{{0, 0},
+                {(float)resized->size.x, (float)resized->size.y}};
+            this->mainWindow.setView(sf::View(visibleArea));
 
+            this->screen_greet.updatePositions(this->mainWindow);
         }
 
         this->screen_greet.handleEvents(event, this->mainWindow);

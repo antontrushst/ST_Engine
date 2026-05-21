@@ -342,7 +342,7 @@ public:
         return hor_overlap && ver_overlap;
     }
 
-    void setPosition(sf::Vector2f position)
+    Button& setPosition(sf::Vector2f position)
     {
         sf::Vector2f position_diff = position - (this->shape[0].position +
             (this->shape[1].position - this->shape[0].position) / 2.f);
@@ -354,9 +354,49 @@ public:
             this->sprite->setPosition(position);
         else
             this->text->setPosition(this->text->getPosition() + position_diff);
+        return *this;
     }
 
-    sf::Vector2f getPosition() {return this->shape[0].position;}
+    sf::Vector2f getPosition()
+    {
+        return
+        {
+            this->shape[0].position.x +
+                (this->shape[2].position.x - this->shape[0].position.x) * 0.5f,
+            this->shape[0].position.y +
+                (this->shape[2].position.y - this->shape[0].position.y) * 0.5f
+        };
+    }
+
+    sf::Vector2f getSize()
+    {
+        return {this->shape[2].position.x - this->shape[0].position.x,
+                this->shape[2].position.y - this->shape[0].position.y};
+    }
+
+    Button& setSize(const sf::Vector2f &size)
+    {
+        sf::Vector2f sizeDiff = size - this->getSize();
+        this->shape[0].position =
+            {this->shape[0].position.x - sizeDiff.x * 0.5f,
+             this->shape[0].position.y - sizeDiff.y * 0.5f};
+        this->shape[1].position =
+            {this->shape[1].position.x + sizeDiff.x * 0.5f,
+             this->shape[1].position.y - sizeDiff.y * 0.5f};
+        this->shape[2].position =
+            {this->shape[2].position.x + sizeDiff.x * 0.5f,
+             this->shape[2].position.y + sizeDiff.y * 0.5f};
+        this->shape[3].position =
+            {this->shape[3].position.x - sizeDiff.x * 0.5f,
+             this->shape[3].position.y - sizeDiff.y * 0.5f};
+        this->shape[4].position =
+            {this->shape[4].position.x - sizeDiff.x * 0.5f,
+             this->shape[4].position.y + sizeDiff.y * 0.5f};
+        this->shape[5].position =
+            {this->shape[5].position.x + sizeDiff.x * 0.5f,
+             this->shape[5].position.y + sizeDiff.y * 0.5f};
+        return *this;
+    }
 };
 
 struct Buttons

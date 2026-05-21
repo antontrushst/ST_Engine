@@ -7,13 +7,16 @@ Screen_Greet::Screen_Greet(
     , LagniaImage{image}
     , buttons{{
         {"newProject",
-            {EngineConfig::getInstance().mainWindow_width / 2.f, 575.f},
+            {EngineConfig::getInstance().mainWindow_width / 2.f,
+                (EngineConfig::getInstance().mainWindow_height * 0.01f) *
+                85 - 55},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "new", 32,
             EngineConfig::getInstance().backColor,
             EngineConfig::getInstance().secondaryColor},
         {"openProject",
-            {EngineConfig::getInstance().mainWindow_width / 2.f, 635.f},
+            {EngineConfig::getInstance().mainWindow_width / 2.f,
+                (EngineConfig::getInstance().mainWindow_height * 0.01f) * 85},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "open", 32,
             EngineConfig::getInstance().backColor,
@@ -21,27 +24,30 @@ Screen_Greet::Screen_Greet(
     }}
 {
     // center Lagnia image origin and position it
-    sf::Vector2f centeredOrigin{this->LagniaImage.getGlobalBounds().size / 2.f +
+    sf::Vector2f centeredOrigin{this->LagniaImage.getGlobalBounds().size * .5f +
         this->LagniaImage.getLocalBounds().position};
     this->LagniaImage.setOrigin(centeredOrigin);
     this->LagniaImage.setPosition({
-        EngineConfig::getInstance().mainWindow_width / 2.f,
-        EngineConfig::getInstance().mainWindow_height / 2.f});
+        EngineConfig::getInstance().mainWindow_width * 0.5f,
+        EngineConfig::getInstance().mainWindow_height * 0.5f});
     // center title and subTitle texts, color and position it
-    centeredOrigin = this->title.getGlobalBounds().size / 2.f +
+    centeredOrigin = this->title.getGlobalBounds().size * 0.5f +
         this->title.getLocalBounds().position;
     this->title.setOrigin({std::round(centeredOrigin.x),
         std::round(centeredOrigin.y)});
     this->title.setPosition({
-        EngineConfig::getInstance().mainWindow_width / 2.f, 120.f});
+        EngineConfig::getInstance().mainWindow_width * 0.5f,
+        (EngineConfig::getInstance().mainWindow_height * 0.01f) * 15});
     this->title.setFillColor(EngineConfig::getInstance().secondaryColor);
 
-    centeredOrigin = this->subTitle.getGlobalBounds().size / 2.f +
+    centeredOrigin = this->subTitle.getGlobalBounds().size * 0.5f +
         this->subTitle.getLocalBounds().position;
     this->subTitle.setOrigin({std::round(centeredOrigin.x),
         std::round(centeredOrigin.y)});
     this->subTitle.setPosition({
-        EngineConfig::getInstance().mainWindow_width / 2.f, 170.f});
+        EngineConfig::getInstance().mainWindow_width * 0.5f,
+        this->title.getPosition().y + this->title.getLocalBounds().size.y +
+        5.f});
     this->subTitle.setFillColor(EngineConfig::getInstance().secondaryColor);
 }
 
@@ -81,5 +87,24 @@ Screen_Greet& Screen_Greet::draw(sf::RenderWindow &window)
     window.draw(this->LagniaImage);
     window.draw(this->title);
     window.draw(this->subTitle);
+    return *this;
+}
+
+Screen_Greet& Screen_Greet::updatePositions(const sf::RenderWindow &window)
+{
+    this->LagniaImage.setPosition({
+        (float)window.getSize().x * 0.5f,
+        (float)window.getSize().y * 0.5f});
+    this->title.setPosition({
+        (float)window.getSize().x * 0.5f, (window.getSize().y * 0.01f) * 15});
+    this->subTitle.setPosition({
+        (float)window.getSize().x * 0.5f, this->title.getPosition().y +
+        this->title.getLocalBounds().size.y + 5.f});
+
+    this->buttons["openProject"].setPosition({(float)window.getSize().x * 0.5f,
+        ((float)window.getSize().y * 0.01f) * 85});
+    this->buttons["newProject"].setPosition({(float)window.getSize().x * 0.5f,
+        this->buttons["openProject"].getPosition().y -
+        (this->buttons["newProject"].getSize().y + 30)});
     return *this;
 }
