@@ -1,4 +1,4 @@
-#include "steng_screen_greet.hpp"
+#include "lag_screen_greet.hpp"
 
 Screen_Greet::Screen_Greet(
     const sf::Texture  &image)

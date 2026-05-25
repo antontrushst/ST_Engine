@@ -1,5 +1,5 @@
-#ifndef STENG_CONFIG_HPP
-#define STENG_CONFIG_HPP
+#ifndef LAG_CONFIG_HPP
+#define LAG_CONFIG_HPP
 
 #include <fstream>
 #include <map>
@@ -7,7 +7,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "st_system.hpp"
-#include "steng_colors.hpp"
+#include "lag_colors.hpp"
 #include "st_sfml.hpp"
 
 struct EngineConfig

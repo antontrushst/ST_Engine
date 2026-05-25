@@ -1,5 +1,5 @@
-#ifndef STENG_COLORS_HPP
-#define STENG_COLORS_HPP
+#ifndef LAG_COLORS_HPP
+#define LAG_COLORS_HPP
 
 #include <SFML/Graphics.hpp>
 

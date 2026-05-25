@@ -1,11 +1,11 @@
-#include "steng_mainWindow.hpp"
+#include "lag_mainWindow.hpp"
 
 MainWindow::MainWindow()
     : mainWindow(sf::RenderWindow(sf::VideoMode(
         {static_cast<unsigned int>(EngineConfig::getInstance().mainWindow_width)
             , static_cast<unsigned int>(
                 EngineConfig::getInstance().mainWindow_height)})
-        , "ST_Engine"))
+        , "Lagnia"))
     , textures{{st::getThisProgramLocation() + "graphics"}}
     , screen_greet{this->textures["lagnia_sketch_transp"]}
 {

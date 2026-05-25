@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(ST_Engine LANGUAGES CXX)
+project(Lagnia LANGUAGES CXX)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib")
@@ -22,9 +22,9 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(${PROJECT_NAME} src/steng_main.cpp
-    src/steng_mainWindow.cpp
-    src/steng_screen_greet.cpp)
+add_executable(${PROJECT_NAME} src/lag_main.cpp
+    src/lag_mainWindow.cpp
+    src/lag_screen_greet.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src/headers" "st_library/")
 #uncomment for no-console execution on Windows

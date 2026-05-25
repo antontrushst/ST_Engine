@@ -1,12 +1,12 @@
-#ifndef STENG_MAINWINDOW_HPP
-#define STENG_MAINWINDOW_HPP
+#ifndef LAG_MAINWINDOW_HPP
+#define LAG_MAINWINDOW_HPP
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
 #include "st_sfml.hpp"
-#include "steng_config.hpp"
-#include "steng_screen_greet.hpp"
+#include "lag_config.hpp"
+#include "lag_screen_greet.hpp"
 
 class MainWindow
 {

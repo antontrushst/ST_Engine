@@ -1,12 +1,12 @@
-#include "steng_config.hpp"
-#include "steng_mainWindow.hpp"
+#include "lag_config.hpp"
+#include "lag_mainWindow.hpp"
 #include "st_system.hpp"
 
 int main()
 {
     EngineConfig::getInstance().
         loadEngineConfig(std::string{st::getThisProgramLocation()
-            + "steng_config.txt"});
+            + "lag_config.cfg"});
     MainWindow mainWindow;
     mainWindow.init();
 

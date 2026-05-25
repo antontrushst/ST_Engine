@@ -1,9 +1,9 @@
-#ifndef STENG_SCREEN_GREET_HPP
-#define STENG_SCREEN_GREET_HPP
+#ifndef LAG_SCREEN_GREET_HPP
+#define LAG_SCREEN_GREET_HPP
 
 #include <SFML/Graphics.hpp>
 #include "st_sfml.hpp"
-#include "steng_config.hpp"
+#include "lag_config.hpp"
 
 class Screen_Greet
 {
