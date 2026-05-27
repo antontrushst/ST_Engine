@@ -1,6 +1,7 @@
 #include "lag_config.hpp"
 #include "lag_mainWindow.hpp"
 #include "st_system.hpp"
+#include "st_string.hpp"
 
 int main()
 {

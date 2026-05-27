@@ -65,6 +65,15 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
     {
         this->buttons["newProject"].setColor(
             EngineConfig::getInstance().mainColor);
+
+        if(const auto* mouseButtonPressed =
+            event->getIf<sf::Event::MouseButtonPressed>())
+            if(mouseButtonPressed->button == sf::Mouse::Button::Left)
+            {
+                /*--------------------------------*/
+                std::cout << "PING!\n";
+            }
+
         return *this;
     }
 

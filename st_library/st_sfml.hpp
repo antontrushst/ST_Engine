@@ -28,8 +28,7 @@ class RoundedQuad : public sf::Drawable
     float radius;
     int thickness;
 
-    void draw(sf::RenderTarget &target,
-        sf::RenderStates states) const override
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override
     {
         target.draw(this->verts, states);
         if(thickness)
@@ -661,7 +660,33 @@ public:
         return iter;
     }
 };
+/* CONTINUE HERE............................................................
+// TYPE FIELD //////////////////////////////////////////////////////////////////
+class InputBox
+{
+    sf::RenderWindow window;
+    sf::Text message;
+    sf::Text input;
+    Button accept;
+    Button cancel;
+    sf::VertexArray inputShape;
+
+public:
+    InputBox(const sf::Font     &font,
+             const std::string  &name = "InputBox",
+             const std::string  &message = "Enter some input.",
+             const sf::Vector2f &position = {0,0},
+             const sf::Color    &backColor = sf::Color::Black,
+             const sf::Color    &inputColor = sf::Color::White,
+             const sf::Color    &buttonActiveColor = sf::Color::Green)
+        : window{sf::VideoMode(position), name}
+        , message{font, message}
+        , input{font}
+        , accept{"accept", }
+    {
+        this->window.setFramerateLimit(30);
+    }
+};.....................................................................*/
 
 }
-
 #endif
