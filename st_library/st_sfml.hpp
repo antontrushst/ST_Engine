@@ -16,6 +16,7 @@
 #include <cmath>
 #include "st_system.hpp"
 #include "st_vector.hpp"
+#include "st_string.hpp"
 
 namespace st_sfml
 {
@@ -240,6 +241,7 @@ class Button : public sf::Drawable
     }
 
 public:
+    // Button with text constructor.............................................
     Button(const std::string  &name,
            const sf::Vector2f &position,
            const sf::Vector2f &size,
@@ -277,7 +279,7 @@ public:
             {std::round(centeredOrigin.x), std::round(centeredOrigin.y)});
         this->text->setPosition(position);
     }
-
+    // Button with icon constructor ............................................
     Button(const std::string  &name,
            const sf::Vector2f &position,
            const sf::Vector2f &size,
@@ -662,29 +664,42 @@ public:
 };
 /* CONTINUE HERE............................................................
 // TYPE FIELD //////////////////////////////////////////////////////////////////
+// Display small box with a message and a field for user input ////////////////
 class InputBox
 {
-    sf::RenderWindow window;
+    sf::VertexArray shapes;
     sf::Text message;
     sf::Text input;
     Button accept;
     Button cancel;
-    sf::VertexArray inputShape;
 
 public:
-    InputBox(const sf::Font     &font,
-             const std::string  &name = "InputBox",
-             const std::string  &message = "Enter some input.",
-             const sf::Vector2f &position = {0,0},
-             const sf::Color    &backColor = sf::Color::Black,
-             const sf::Color    &inputColor = sf::Color::White,
-             const sf::Color    &buttonActiveColor = sf::Color::Green)
-        : window{sf::VideoMode(position), name}
-        , message{font, message}
-        , input{font}
-        , accept{"accept", }
+    InputBox(const sf::RenderWindow & window,
+             const sf::Font         &font,
+             const st::String       &message = "Enter some input.",
+             const unsigned int     &textSize = 30;
+             const sf::Color        &backColor = sf::Color::Black,
+             const sf::Color        &inputColor = sf::Color::White,
+             const sf::Color        &acceptColor = sf::Color::Green,
+             const sf::Color        &cancelColor = sf::Color::Red) 
+        : message{font, message, textSize}
+        , input{font, "", textSize}
+        , accept{"accept", {(size.x * 0.5f) * 0.5f, size.y - }}
+        , shapes{[&]() -> sf::VertexArray
+            {
+                sf::VertexArray temp{sf::PrimitiveType::Triangles, 18};
+                // greyed-out background
+                temp[0].position{0.f, 0.f};
+                temp[1].position{window.getSize().x, 0.f};
+                temp[2].position{0.f, window.getSize().y};
+                temp[3].position{window.getSize().x, window.getSize().y};
+                temp[4].position{temp[1].position};
+                temp[5].position{temp[2].position};
+                // box shape
+                temp[6].position{};
+                return temp;
+            }()}
     {
-        this->window.setFramerateLimit(30);
     }
 };.....................................................................*/
 

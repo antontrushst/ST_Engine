@@ -5,6 +5,7 @@
 
 namespace color
 {
+    inline constexpr sf::Color Crimson(220, 20, 50, 255);
     inline constexpr sf::Color Toxic(45, 207, 121, 255);
     inline constexpr sf::Color SoftBlack(49, 20, 45, 255);
     inline constexpr sf::Color Grey(128, 128, 128, 255);
