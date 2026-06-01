@@ -71,12 +71,17 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
             if(mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
                 /*--------------------------------*/
-                st_sfml::InputBox ib{window, EngineConfig::getInstance().font,
+                if(std::optional<std::string> gameName{st_sfml::inputBox(
+                    window, EngineConfig::getInstance().font,
                     "Enter name of your game:",
                     EngineConfig::getInstance().secondaryColor,
                     EngineConfig::getInstance().backColor,
                     EngineConfig::getInstance().mainColor,
-                    EngineConfig::getInstance().altColor};
+                    EngineConfig::getInstance().altColor)};
+                    gameName.has_value())
+                {
+                    std::cout << gameName.value() << std::endl;
+                }
             }
 
         return *this;
