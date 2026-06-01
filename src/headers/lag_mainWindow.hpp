@@ -10,7 +10,7 @@
 
 class MainWindow
 {
-    sf::RenderWindow mainWindow;
+    sf::RenderWindow window;
     st_sfml::Textures textures;
     Screen_Greet screen_greet;
     
@@ -19,6 +19,8 @@ public:
 
     void init();
     void handleEvents();
+
+    sf::RenderWindow& getWindow() {return this->window;}
 };
 
 #endif

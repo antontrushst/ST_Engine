@@ -662,46 +662,164 @@ public:
         return iter;
     }
 };
-/* CONTINUE HERE............................................................
+
 // TYPE FIELD //////////////////////////////////////////////////////////////////
 // Display small box with a message and a field for user input ////////////////
-class InputBox
+class InputBox : public sf::Drawable
 {
     sf::VertexArray shapes;
     sf::Text message;
     sf::Text input;
+    sf::Text hint;
     Button accept;
     Button cancel;
 
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override
+    {
+        target.draw(this->shapes, states);
+        target.draw(this->message, states);
+        target.draw(this->hint, states);
+        target.draw(this->input, states);
+        target.draw(this->accept, states);
+        target.draw(this->cancel, states);
+    }
+
 public:
-    InputBox(const sf::RenderWindow & window,
+    InputBox(sf::RenderWindow       &window,
              const sf::Font         &font,
-             const st::String       &message = "Enter some input.",
-             const unsigned int     &textSize = 30;
-             const sf::Color        &backColor = sf::Color::Black,
-             const sf::Color        &inputColor = sf::Color::White,
+             const std::string      &message,
+             const sf::Color        &frontColor = sf::Color::Black,
+             const sf::Color        &backColor = sf::Color::White,
              const sf::Color        &acceptColor = sf::Color::Green,
-             const sf::Color        &cancelColor = sf::Color::Red) 
-        : message{font, message, textSize}
-        , input{font, "", textSize}
-        , accept{"accept", {(size.x * 0.5f) * 0.5f, size.y - }}
-        , shapes{[&]() -> sf::VertexArray
+             const sf::Color        &cancelColor = sf::Color::Red,
+             const unsigned int     &textSize = 20,
+             const std::string      &hint = "Enter input here")
+        : shapes{[&]() -> sf::VertexArray
             {
                 sf::VertexArray temp{sf::PrimitiveType::Triangles, 18};
                 // greyed-out background
-                temp[0].position{0.f, 0.f};
-                temp[1].position{window.getSize().x, 0.f};
-                temp[2].position{0.f, window.getSize().y};
-                temp[3].position{window.getSize().x, window.getSize().y};
-                temp[4].position{temp[1].position};
-                temp[5].position{temp[2].position};
+                temp[0].position = {0.f, 0.f};
+                temp[1].position = {(float)window.getSize().x, 0.f};
+                temp[2].position = {0.f, (float)window.getSize().y};
+                temp[3].position = {(float)window.getSize().x,
+                    (float)window.getSize().y};
+                temp[4].position = {temp[1].position};
+                temp[5].position = {temp[2].position};
                 // box shape
-                temp[6].position{};
+                sf::Vector2f shapeSize{300.f, 225.f};
+                sf::Text msgTemp{font, st::String{message, 27}.getString(), 20};
+                if(msgTemp.getLocalBounds().size.y > 75.f)
+                    shapeSize.y += msgTemp.getLocalBounds().size.y - 75.f;
+                temp[6].position =
+                    {window.getSize().x * 0.5f - shapeSize.x * 0.5f,
+                    window.getSize().y * 0.5f - shapeSize.y * 0.5f};
+                temp[7].position =
+                    {window.getSize().x * 0.5f + shapeSize.x * 0.5f,
+                    window.getSize().y * 0.5f - shapeSize.y * 0.5f};
+                temp[8].position =
+                    {window.getSize().x * 0.5f - shapeSize.x * 0.5f,
+                    window.getSize().y * 0.5f + shapeSize.y * 0.5f};
+                temp[9].position =
+                    {window.getSize().x * 0.5f + shapeSize.x * 0.5f,
+                    window.getSize().y * 0.5f + shapeSize.y * 0.5f};
+                temp[10].position = {temp[7].position};
+                temp[11].position = {temp[8].position};
+                // input field shape
+                temp[12].position =
+                    {temp[8].position.x + 25.f, temp[8].position.y - 100.f};
+                temp[13].position =
+                    {temp[7].position.x - 25.f, temp[12].position.y};
+                temp[14].position =
+                    {temp[12].position.x, temp[12].position.y + 30.f};
+                temp[15].position = {temp[13].position.x, temp[14].position.y};
+                temp[16].position = {temp[13].position};
+                temp[17].position = {temp[14].position};
+                // set shapes colors
+                for(int i{0}; i < temp.getVertexCount(); ++i)
+                {
+                    if(i > 11)
+                        temp[i].color = frontColor;
+                    else if(i > 5)
+                        temp[i].color = backColor;
+                    else
+                        temp[i].color = sf::Color{0, 0, 0, 150};
+                }
                 return temp;
             }()}
+        , message{[&]()-> sf::Text
+            {
+                sf::Text temp{font, st::String{message, 27}.getString(), 20};
+                temp.setFillColor(frontColor);
+                temp.setPosition({this->shapes[6].position.x + 25.f,
+                    this->shapes[6].position.y + 25.f});
+                return temp;
+            }()}
+        , input{[&]()-> sf::Text
+            {
+                sf::Text temp{font, "", textSize};
+                temp.setFillColor(backColor);
+                float centeredY{temp.getGlobalBounds().size.y * 0.5f +
+                    temp.getLocalBounds().position.y};
+                temp.setOrigin({temp.getOrigin().x, std::round(centeredY)});
+                temp.setPosition({this->shapes[12].position.x + 18.f,
+                    this->shapes[12].position.y + (this->shapes[14].position.y -
+                    this->shapes[12].position.y) * 0.5f});
+                return temp;
+            }()}
+        , hint{[&]()-> sf::Text
+            {
+                sf::Text temp{font, hint, textSize};
+                temp.setFillColor({backColor.r, backColor.g, backColor.b,
+                    static_cast<uint8_t>(backColor.a * 0.5)});
+                float centeredY{temp.getGlobalBounds().size.y * 0.5f +
+                    temp.getLocalBounds().position.y};
+                temp.setOrigin({temp.getOrigin().x, std::round(centeredY)});
+                temp.setPosition(this->input.getPosition());
+                return temp;
+            }()}
+        , accept{"accept", {shapes[14].position.x + 50.f,
+            shapes[14].position.y + 30.f},
+            {100.f, 30.f}, font, "accept",
+            textSize, backColor, frontColor}
+        , cancel{"cancel", {shapes[15].position.x - 50.f,
+            shapes[14].position.y + 30.f},
+            {100.f, 30.f}, font, "cancel",
+            textSize, backColor, frontColor}
     {
+        sf::Texture screenshot{window.getSize()};
+        screenshot.update(window);
+        sf::Sprite previousGraphics{screenshot};
+        while(window.isOpen())
+        {
+            sf::Vector2i mousePos{sf::Mouse::getPosition(window)};
+            while(const std::optional event = window.pollEvent())
+            {
+                if(event->is<sf::Event::Closed>())
+                    window.close();
+                if(this->accept.contains({(float)mousePos.x,
+                    (float)mousePos.y}))
+                {
+                    this->accept.setColor(acceptColor);
+                }
+                else
+                    this->accept.setColor(frontColor);
+                if(this->cancel.contains({(float)mousePos.x,
+                    (float)mousePos.y}))
+                {
+                    this->cancel.setColor(cancelColor);
+                }
+                else
+                {
+                    this->cancel.setColor(frontColor);
+                }
+            }
+            window.clear(sf::Color::Green);
+            window.draw(previousGraphics);
+            window.draw(*this);
+            window.display();
+        }
     }
-};.....................................................................*/
+};
 
 }
 #endif

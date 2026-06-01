@@ -52,7 +52,7 @@ Screen_Greet::Screen_Greet(
 }
 
 Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
-    const sf::RenderWindow &window)
+    sf::RenderWindow &window)
 {
     this->buttons["newProject"].
         setColor(EngineConfig::getInstance().secondaryColor);
@@ -71,7 +71,12 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
             if(mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
                 /*--------------------------------*/
-                std::cout << "PING!\n";
+                st_sfml::InputBox ib{window, EngineConfig::getInstance().font,
+                    "Enter name of your game:",
+                    EngineConfig::getInstance().secondaryColor,
+                    EngineConfig::getInstance().backColor,
+                    EngineConfig::getInstance().mainColor,
+                    EngineConfig::getInstance().altColor};
             }
 
         return *this;

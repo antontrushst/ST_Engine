@@ -24,6 +24,7 @@ struct EngineConfig
     st_sfml::Textures buttonIcons{std::string{
         st::getThisProgramLocation() + "graphics"}};
     sf::Color mainColor = color::Toxic;
+    sf::Color altColor = color::Crimson;
     sf::Color secondaryColor = color::SoftBlack;
     sf::Color backColor = color::Milk;
 
@@ -46,7 +47,7 @@ inline EngineConfig& EngineConfig::loadEngineConfig(const std::string &path)
     enum class keys
     {
         mainWindow_width, mainWindow_height,
-        mainColor, secondaryColor, backColor
+        mainColor, altColor, secondaryColor, backColor
     };
 
     std::map<std::string, keys> keysMap =
@@ -54,6 +55,7 @@ inline EngineConfig& EngineConfig::loadEngineConfig(const std::string &path)
         {"mainWindow_width", keys::mainWindow_width},
         {"mainWindow_height", keys::mainWindow_height},
         {"mainColor", keys::mainColor},
+        {"altColor", keys::altColor},
         {"secondaryColor", keys::secondaryColor},
         {"backColor", keys::backColor}
     };
@@ -91,6 +93,21 @@ inline EngineConfig& EngineConfig::loadEngineConfig(const std::string &path)
                             this->mainColor.b = std::stoi(subValue);
                         else
                             this->mainColor.a = std::stoi(subValue);
+                    } break;}
+                case keys::altColor:{
+                    std::stringstream ss(value);
+                    std::string subValue;
+                    for(int i{0}; i < 4; i++)
+                    {
+                        std::getline(ss, subValue, ',');
+                        if(i == 0)
+                            this->altColor.r = std::stoi(subValue);
+                        else if (i == 1)
+                            this->altColor.g = std::stoi(subValue);
+                        else if (i == 2)
+                            this->altColor.b = std::stoi(subValue);
+                        else
+                            this->altColor.a = std::stoi(subValue);
                     } break;}
                 case keys::secondaryColor:{
                     std::stringstream ss(value);
@@ -145,6 +162,11 @@ inline EngineConfig& EngineConfig::loadEngineConfig(const std::string &path)
                    << std::to_string(this->mainColor.g) << ","
                    << std::to_string(this->mainColor.b) << ","
                    << std::to_string(this->mainColor.a) << std::endl;
+        configFile << "altColor="
+                   << std::to_string(this->altColor.r) << ","
+                   << std::to_string(this->altColor.g) << ","
+                   << std::to_string(this->altColor.b) << ","
+                   << std::to_string(this->altColor.a) << std::endl;
         configFile << "secondaryColor="
                    << std::to_string(this->secondaryColor.r) << ","
                    << std::to_string(this->secondaryColor.g) << ","
