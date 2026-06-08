@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <cctype>
 #include <optional>
 #include <filesystem>
 #include <numbers>
@@ -663,7 +664,82 @@ public:
     }
 };
 
-// TYPE FIELD //////////////////////////////////////////////////////////////////
+// INPUT FIELD /////////////////////////////////////////////////////////////////
+class InputField : public sf::Drawable
+{
+    bool active;
+    sf::RectangleShape shape;
+    std::string text;
+    sf::Text displayedText;
+    sf::Text hint;
+    unsigned int displayedText_length;
+    unsigned int cursorIndex;
+    sf::Text cursor;
+
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override
+    {
+        target.draw(this->shape, states);
+        if(this->displayedText.getString().isEmpty())
+            if(!this->hint.getString().isEmpty())
+                target.draw(this->hint, states);
+        else
+            target.draw(this->displayedText, states);
+        target.draw(this->cursor);
+    }
+public:
+    InputField(const sf::Font &font, unsigned int textSize,
+        const sf::Vector2f &position, const sf::Vector2f &size,
+        unsigned int displayedText_length, const std::string &hint = "",
+        const sf::Color &color_text = sf::Color::Black,
+        const sf::Color &color_back = sf::Color::White)
+        : active{false}
+        , shape{[&]()-> sf::RectangleShape
+            {
+                sf::RectangleShape temp{size};
+                temp.setPosition(position);
+                temp.setFillColor(color_back);
+                return temp;
+            }()}
+        , text{"A"}
+        , displayedText{[&]()-> sf::Text
+            {
+                sf::Text temp{font, "A", textSize};
+                float centeredOriginY =
+                    {temp.getGlobalBounds().size.y * 0.5f +
+                        temp.getLocalBounds().position.y};
+                temp.setOrigin({temp.getOrigin().x,
+                    std::round(centeredOriginY)});
+                temp.setPosition(shape.getPosition());
+                temp.setFillColor(color_text);
+                return temp;
+            }()}
+        , hint{[&]()-> sf::Text
+            {
+                sf::Text temp(this->displayedText);
+                temp.setString(hint);
+                temp.setFillColor({color_text.r, color_text.g, color_text.b,
+                    100});
+                return temp;
+            }()}
+        , displayedText_length{displayedText_length}
+        , cursorIndex{0}
+        , cursor{[&]()-> sf::Text
+            {
+                sf::Text temp(this->displayedText);
+                temp.setString("|");
+                return temp;
+            }()}
+    {}
+
+    bool isEmpty() {return this->text.empty();}
+    bool containsWhitespace()
+    {
+        return std::any_of(this->text.begin(), this->text.end(),
+            [](unsigned char ch) {return std::isspace(ch);});
+    }
+    std::string getString() {return this->text;}
+};
+
 // Display small box with a message and a field for user input ////////////////
 inline std::optional<std::string> inputBox(
     sf::RenderWindow       &window,
@@ -674,13 +750,11 @@ inline std::optional<std::string> inputBox(
     const sf::Color        &acceptColor = sf::Color::Green,
     const sf::Color        &cancelColor = sf::Color::Red,
     const std::string      &hint = "Enter input here",
-    const unsigned int     &textSize = 20)
+    unsigned int            textSize = 20)
 {
     sf::Text m_message{font, st::String{message, 27}.getString(), textSize};
-    sf::Text input{font, "A", textSize};
-    sf::Text m_hint{font, "A", textSize};
     sf::Text error{font, "", textSize};
-    sf::VertexArray shapes{sf::PrimitiveType::Triangles, 18};
+    sf::VertexArray shapes{sf::PrimitiveType::Triangles, 12};
     // greyed-out background
     shapes[0].position = {0.f, 0.f};
     shapes[1].position = {(float)window.getSize().x, 0.f};
@@ -707,7 +781,7 @@ inline std::optional<std::string> inputBox(
         window.getSize().y * 0.5f + shapeSize.y * 0.5f};
     shapes[10].position = {shapes[7].position};
     shapes[11].position = {shapes[8].position};
-    // input field shape
+    /*// input field shape
     shapes[12].position =
         {shapes[8].position.x + 25.f, shapes[8].position.y - 100.f};
     shapes[13].position =
@@ -716,17 +790,20 @@ inline std::optional<std::string> inputBox(
         {shapes[12].position.x, shapes[12].position.y + 30.f};
     shapes[15].position = {shapes[13].position.x, shapes[14].position.y};
     shapes[16].position = {shapes[13].position};
-    shapes[17].position = {shapes[14].position};
+    shapes[17].position = {shapes[14].position};*/
     // set shapes colors
     for(int i{0}; i < shapes.getVertexCount(); ++i)
     {
-        if(i > 11)
-            shapes[i].color = frontColor;
-        else if(i > 5)
+        if(i > 5)
             shapes[i].color = backColor;
         else
             shapes[i].color = sf::Color{0, 0, 0, 150};
     }
+
+    InputField input{font, textSize,
+        {shapes[8].position.x + 25.f, shapes[8].position.y - 100.f},
+        {(shapes[7].position.x - 25.f) - (shapes[8].position.x + 25.f), 30},
+        30, hint};
 
     m_message.setFillColor(frontColor);
     m_message.setPosition({shapes[6].position.x + 25.f,
@@ -734,28 +811,17 @@ inline std::optional<std::string> inputBox(
     error.setFillColor(cancelColor);
     error.setPosition({m_message.getPosition().x, m_message.getPosition().y +
         m_message.getGlobalBounds().size.y});
-    input.setFillColor(backColor);
-    float centeredY{input.getGlobalBounds().size.y * 0.5f +
-        input.getLocalBounds().position.y};
-    input.setOrigin({input.getOrigin().x, std::round(centeredY)});
-    input.setPosition({shapes[12].position.x + 18.f,
-        shapes[12].position.y + (shapes[14].position.y -
-        shapes[12].position.y) * 0.5f});
-    centeredY = {m_hint.getGlobalBounds().size.y * 0.5f +
-        m_hint.getLocalBounds().position.y};
-    m_hint.setFillColor({backColor.r, backColor.g, backColor.b,
-        static_cast<uint8_t>(backColor.a * 0.5)});
-    m_hint.setOrigin({m_hint.getOrigin().x, std::round(centeredY)});
-    m_hint.setPosition(input.getPosition());
-    input.setString("");
-    m_hint.setString("");
 
-    Button accept{"accept", {shapes[14].position.x + 50.f,
-        shapes[14].position.y + 30.f},
+    Button accept{"accept",
+        {shapes[6].position.x +
+            (shapes[7].position.x - shapes[6].position.x) * 0.25f,
+            shapes[8].position.y - 35.f},
         {100.f, 30.f}, font, "accept",
         textSize, backColor, frontColor};
-    Button cancel{"cancel", {shapes[15].position.x - 50.f,
-        shapes[14].position.y + 30.f},
+    Button cancel{"cancel",
+        {shapes[6].position.x +
+            (shapes[7].position.x - shapes[6].position.x) * 0.75f,
+            shapes[8].position.y - 35.f},
         {100.f, 30.f}, font, "cancel",
         textSize, backColor, frontColor};
 
@@ -770,11 +836,6 @@ inline std::optional<std::string> inputBox(
             if(event->is<sf::Event::Closed>())
                 window.close();
 
-            if(input.getString().isEmpty())
-                m_hint.setString(hint);
-            else
-                m_hint.setString("");
-
             if(accept.contains({(float)mousePos.x, (float)mousePos.y}))
             {
                 accept.setColor(acceptColor);
@@ -782,22 +843,22 @@ inline std::optional<std::string> inputBox(
                     event->getIf<sf::Event::MouseButtonPressed>()})
                     if(mousePressed->button == sf::Mouse::Button::Left)
                     {
-                        if(input.getString().find(' ') != std::string::npos)
+                        if(input.containsWhitespace())
                         {
                             error.setString(st::String{
                                 "Whitespaces are not allowed!", 27}.
                                 getString());
                             continue;
                         }
-                        else if(input.getString().isEmpty())
+                        else if(input.isEmpty())
                         {
-                            error.setString(st::String{"Empty name!", 27}.
+                            error.setString(st::String{"Cannot be empty!", 27}.
                                 getString());
                             continue;
                         }
                         else
                         {
-                            return input.getString().toAnsiString();
+                            return input.getString();
                         }
                     }
             }
@@ -826,10 +887,7 @@ inline std::optional<std::string> inputBox(
         window.draw(m_message);
         if(!error.getString().isEmpty())
             window.draw(error);
-        window.draw(m_hint);
-        if(input.getString().isEmpty())
-            window.draw(m_hint);
-        else
+        if(!input.isEmpty())
             window.draw(input);
         window.draw(accept);
         window.draw(cancel);
