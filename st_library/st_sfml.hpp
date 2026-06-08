@@ -679,43 +679,52 @@ class InputField : public sf::Drawable
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override
     {
         target.draw(this->shape, states);
-        if(this->displayedText.getString().isEmpty())
+        if(this->active)
+        {
+            target.draw(this->displayedText, states);
+            target.draw(this->cursor, states);
+        }
+        else
+        {
             if(!this->hint.getString().isEmpty())
                 target.draw(this->hint, states);
-        else
-            target.draw(this->displayedText, states);
-        target.draw(this->cursor);
+        }
     }
 public:
     InputField(const sf::Font &font, unsigned int textSize,
         const sf::Vector2f &position, const sf::Vector2f &size,
         unsigned int displayedText_length, const std::string &hint = "",
         const sf::Color &color_text = sf::Color::Black,
-        const sf::Color &color_back = sf::Color::White)
+        const sf::Color &color_back = sf::Color::White,
+        const sf::Color &color_outline = sf::Color::Black)
         : active{false}
         , shape{[&]()-> sf::RectangleShape
             {
                 sf::RectangleShape temp{size};
                 temp.setPosition(position);
                 temp.setFillColor(color_back);
+                temp.setOutlineColor(color_outline);
                 return temp;
             }()}
-        , text{"A"}
+        , text{""}
         , displayedText{[&]()-> sf::Text
             {
-                sf::Text temp{font, "A", textSize};
+                sf::Text temp{font, "AAAAAAA", textSize};
                 float centeredOriginY =
                     {temp.getGlobalBounds().size.y * 0.5f +
                         temp.getLocalBounds().position.y};
                 temp.setOrigin({temp.getOrigin().x,
                     std::round(centeredOriginY)});
-                temp.setPosition(shape.getPosition());
+                temp.setPosition({
+                    shape.getPosition().x + 15.f,
+                    shape.getPosition().y + shape.getSize().y * 0.5f});
                 temp.setFillColor(color_text);
+                temp.setString("");
                 return temp;
             }()}
         , hint{[&]()-> sf::Text
             {
-                sf::Text temp(this->displayedText);
+                sf::Text temp{this->displayedText};
                 temp.setString(hint);
                 temp.setFillColor({color_text.r, color_text.g, color_text.b,
                     100});
@@ -725,12 +734,39 @@ public:
         , cursorIndex{0}
         , cursor{[&]()-> sf::Text
             {
-                sf::Text temp(this->displayedText);
+                sf::Text temp{this->displayedText};
                 temp.setString("|");
                 return temp;
             }()}
     {}
 
+    void setActive() {this->active = true;}
+    void setInactive() {this->active = false;}
+    void handleEvents(const std::optional<sf::Event> &event,
+        const sf::Vector2i &mousePos)
+    {
+        if(this->contains({(float)mousePos.x, (float)mousePos.y}))
+            this->shape.setOutlineThickness(2);
+        else
+            this->shape.setOutlineThickness(0);
+
+        if(!this->active)
+            return;
+
+        if(const auto *textEvent = event->getIf<sf::Event::TextEntered>())
+        {
+            char32_t unicodeChar = textEvent->unicode;
+            if(unicodeChar == 8)
+            {
+                if(!this->text.empty())
+                    this->text.pop_back();
+            }
+            else if(unicodeChar >= 32 && unicodeChar < 127)
+                this->text += static_cast<char>(unicodeChar);
+        }
+
+        this->displayedText.setString(this->text);
+    }
     bool isEmpty() {return this->text.empty();}
     bool containsWhitespace()
     {
@@ -738,10 +774,19 @@ public:
             [](unsigned char ch) {return std::isspace(ch);});
     }
     std::string getString() {return this->text;}
+    bool contains(const sf::Vector2f &point)
+    {
+        bool hor_overlap{point.x >= this->shape.getPosition().x &&
+            point.x <= this->shape.getPosition().x + this->shape.getSize().x};
+        bool ver_overlap{point.y >= this->shape.getPosition().y &&
+            point.y <= this->shape.getPosition().y + this->shape.getSize().y};
+        return hor_overlap && ver_overlap;
+    }
 };
 
-// Display small box with a message and a field for user input ////////////////
-inline std::optional<std::string> inputBox(
+// Display small popup box with a message and a field for user input that //////
+// pauses the main loop ////////////////////////////////////////////////////////
+inline std::optional<std::string> inputPopup(
     sf::RenderWindow       &window,
     const sf::Font         &font,
     const std::string      &message,
@@ -781,16 +826,6 @@ inline std::optional<std::string> inputBox(
         window.getSize().y * 0.5f + shapeSize.y * 0.5f};
     shapes[10].position = {shapes[7].position};
     shapes[11].position = {shapes[8].position};
-    /*// input field shape
-    shapes[12].position =
-        {shapes[8].position.x + 25.f, shapes[8].position.y - 100.f};
-    shapes[13].position =
-        {shapes[7].position.x - 25.f, shapes[12].position.y};
-    shapes[14].position =
-        {shapes[12].position.x, shapes[12].position.y + 30.f};
-    shapes[15].position = {shapes[13].position.x, shapes[14].position.y};
-    shapes[16].position = {shapes[13].position};
-    shapes[17].position = {shapes[14].position};*/
     // set shapes colors
     for(int i{0}; i < shapes.getVertexCount(); ++i)
     {
@@ -803,7 +838,7 @@ inline std::optional<std::string> inputBox(
     InputField input{font, textSize,
         {shapes[8].position.x + 25.f, shapes[8].position.y - 100.f},
         {(shapes[7].position.x - 25.f) - (shapes[8].position.x + 25.f), 30},
-        30, hint};
+        30, hint, backColor, frontColor, backColor};
 
     m_message.setFillColor(frontColor);
     m_message.setPosition({shapes[6].position.x + 25.f,
@@ -830,6 +865,7 @@ inline std::optional<std::string> inputBox(
     sf::Sprite previousGraphics{screenshot};
     while(window.isOpen())
     {
+        input.setActive();
         sf::Vector2i mousePos{sf::Mouse::getPosition(window)};
         while(const std::optional event = window.pollEvent())
         {
@@ -876,10 +912,9 @@ inline std::optional<std::string> inputBox(
                 }
             }
             else
-            {
                 cancel.setColor(frontColor);
-                continue;
-            }
+
+            input.handleEvents(event, mousePos);
         }
         window.clear();
         window.draw(previousGraphics);
@@ -887,8 +922,7 @@ inline std::optional<std::string> inputBox(
         window.draw(m_message);
         if(!error.getString().isEmpty())
             window.draw(error);
-        if(!input.isEmpty())
-            window.draw(input);
+        window.draw(input);
         window.draw(accept);
         window.draw(cancel);
         window.display();
