@@ -5,8 +5,10 @@
 #include <iostream>
 #include <filesystem>
 #include <string>
+#include <vector>
 #include <shlobj.h>
 #include <objbase.h>
+#include <optional>
 
 namespace st
 {
@@ -76,6 +78,19 @@ namespace st
             " on line " << std::to_string(__LINE__) << "!\n" <<
             text << "\033[0m" << std::endl;
     }
+    // CONVERTER STD::STRING TO STD::WSTRING ///////////////////////////////////
+    inline std::wstring convertToWString(const std::string &utf8_str)
+    {
+        if(utf8_str.empty())
+            return L"";
+
+        int bufferSize{MultiByteToWideChar(CP_UTF8, 0, &utf8_str[0],
+            (int)utf8_str.size(), NULL, 0)};
+        std::wstring result(bufferSize, 0);
+        MultiByteToWideChar(CP_UTF8, 0, &utf8_str[0], (int)utf8_str.size(),
+            &result[0], bufferSize);
+        return result;
+    }
     // GET CURRENT PROGRAM LOCATION ////////////////////////////////////////////
     inline std::string getThisProgramLocation()
     {
@@ -88,16 +103,15 @@ namespace st
             return path;
         #endif
     }
-
     // OPEN FOLDER /////////////////////////////////////////////////////////////
-    inline std::string getFolder()
+    inline std::optional<std::string> getFolder(const std::string &title = "")
     {
         HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED
             | COINIT_DISABLE_OLE1DDE);
         if(!SUCCEEDED(hr))
         {
-            msg_err("ERROR: GetFolder Failed! Handle not initialized!");
-            exit(-1);
+            msg_warn("Warning: GetFolder Failed! Handle not initialized!");
+            return std::nullopt;
         }
 
         IFileOpenDialog *pFileOpen;
@@ -105,44 +119,53 @@ namespace st
             IID_PPV_ARGS(&pFileOpen));
         if(!SUCCEEDED(hr))
         {
-            msg_err("ERROR: GetFolder Failed! Handle instance not created!");
-            exit(-1);
+            msg_warn("Warning: GetFolder Failed! Handle instance not created!");
+            return std::nullopt;
         }
 
         DWORD dwFlags;
         hr = pFileOpen->GetOptions(&dwFlags);
         if(!SUCCEEDED(hr))
         {
-            msg_err("ERROR: GetFolder Failed! Couldn't get handle options!");
-            exit(-1);
+            msg_warn("Warning: GetFolder Failed! Couldn't get handle options!");
+            return std::nullopt;
         }
 
-        hr = pFileOpen->SetOptions(dwFlags | FOS_FORCEFILESYSTEM | FOS_PICKFOLDERS);
+        hr = pFileOpen->SetOptions(dwFlags | FOS_FORCEFILESYSTEM |
+            FOS_PICKFOLDERS);
+
+        // set custom window title if provided
+        if(!title.empty())
+        {
+            pFileOpen->SetTitle(convertToWString(title).c_str());
+        }
+        // ...................................
+
         hr = pFileOpen->Show(NULL);
         if(!SUCCEEDED(hr))
         {
-            msg_err("ERROR: GetFolder Failed! Couldn't show dialog!");
-            exit(-1);
+            msg_warn("Warning: GetFolder Failed! Couldn't show dialog!");
+            return std::nullopt;
         }
 
         IShellItem *pItem;
         hr = pFileOpen->GetResult(&pItem);
         if(!SUCCEEDED(hr))
         {
-            msg_err("ERROR: GetFolder Failed! Couldn't get results!");
-            exit(-1);
+            msg_warn("Warning: GetFolder Failed! Couldn't get results!");
+            return std::nullopt;
         }
 
         PWSTR pszFilePath;
         hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
         if(!SUCCEEDED(hr))
         {
-            msg_err("ERROR: GetFolder Failed! Couldn't get display name!");
-            exit(-1);
+            msg_warn("Warning: GetFolder Failed! Couldn't get display name!");
+            return std::nullopt;
         }
 
-        int bufferSize = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, NULL, 0,
-            NULL, NULL);
+        int bufferSize = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, NULL,
+            0, NULL, NULL);
         std::vector<char> ansiBuffer(bufferSize);
         WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, ansiBuffer.data(),
             bufferSize, NULL, NULL);

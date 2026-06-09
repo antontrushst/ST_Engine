@@ -80,7 +80,10 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
                     EngineConfig::getInstance().altColor)};
                     gameName.has_value())
                 {
-                    std::cout << gameName.value() << std::endl;
+                    std::string newProject_path{
+                        st::getFolder("Select a folder for your game project "
+                        "directory to be created in").value_or("")};
+                    std::cout << newProject_path << std::endl;
                 }
             }
 
