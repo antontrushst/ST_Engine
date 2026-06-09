@@ -682,7 +682,8 @@ class InputField : public sf::Drawable
         if(this->active)
         {
             target.draw(this->displayedText, states);
-            target.draw(this->cursor, states);
+            if(this->cursorVisible)
+                target.draw(this->cursor, states);
         }
         else
         {
@@ -738,10 +739,14 @@ public:
                 temp.setString("|");
                 return temp;
             }()}
+        , cursorVisible{true}
     {}
+
+    bool cursorVisible;
 
     void setActive() {this->active = true;}
     void setInactive() {this->active = false;}
+
     void handleEvents(const std::optional<sf::Event> &event,
         const sf::Vector2i &mousePos)
     {
@@ -759,14 +764,40 @@ public:
             if(unicodeChar == 8)
             {
                 if(!this->text.empty())
-                    this->text.pop_back();
+                {
+                    if(this->cursorIndex > 0)
+                        this->cursorIndex--;
+                    this->text.erase(cursorIndex, 1);
+                }
             }
             else if(unicodeChar >= 32 && unicodeChar < 127)
-                this->text += static_cast<char>(unicodeChar);
+            {
+                this->text.insert(
+                    cursorIndex, 1, static_cast<char>(unicodeChar));
+                this->cursorIndex++;
+            }
         }
+
+        if(const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
+        {
+            if(keyPressed->code == sf::Keyboard::Key::Left &&
+                this->cursorIndex > 0)
+                this->cursorIndex--;
+            else if(keyPressed->code == sf::Keyboard::Key::Right &&
+                this->cursorIndex < this->text.size())
+                this->cursorIndex++;
+        }
+
+        sf::Text temp{this->displayedText};
+        temp.setString(this->text.substr(0, this->cursorIndex));
+        this->cursor.setPosition({
+            temp.getGlobalBounds().position.x +
+            temp.getLocalBounds().size.x,
+            this->cursor.getPosition().y});
 
         this->displayedText.setString(this->text);
     }
+
     bool isEmpty() {return this->text.empty();}
     bool containsWhitespace()
     {
@@ -863,14 +894,46 @@ inline std::optional<std::string> inputPopup(
     sf::Texture screenshot{window.getSize()};
     screenshot.update(window);
     sf::Sprite previousGraphics{screenshot};
+    sf::Clock clock;
+    input.setActive();
     while(window.isOpen())
     {
-        input.setActive();
         sf::Vector2i mousePos{sf::Mouse::getPosition(window)};
+
+        if(clock.getElapsedTime().asSeconds() >= 0.5f)
+        {
+            if(input.cursorVisible)
+                input.cursorVisible = false;
+            else
+                input.cursorVisible = true;
+            clock.restart();
+        }
+
         while(const std::optional event = window.pollEvent())
         {
             if(event->is<sf::Event::Closed>())
                 window.close();
+
+            if(const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
+            {
+                if(keyPressed->code == sf::Keyboard::Key::Enter)
+                {
+                    if(input.containsWhitespace())
+                    {
+                        error.setString(st::String{
+                            "Whitespaces are not allowed!", 27}.getString());
+                        continue;
+                    }
+                    else if(input.isEmpty())
+                    {
+                        error.setString(st::String{"Cannot be empty!", 27}.
+                            getString());
+                        continue;
+                    }
+                    return input.getString();
+                }
+                error.setString("");
+            }
 
             if(accept.contains({(float)mousePos.x, (float)mousePos.y}))
             {
@@ -892,10 +955,7 @@ inline std::optional<std::string> inputPopup(
                                 getString());
                             continue;
                         }
-                        else
-                        {
-                            return input.getString();
-                        }
+                        return input.getString();
                     }
             }
             else
