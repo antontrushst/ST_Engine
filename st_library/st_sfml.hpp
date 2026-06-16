@@ -25,11 +25,13 @@ namespace st_sfml
 class Quad : public sf::Drawable
 {
     sf::VertexArray verts;
-    //std::optional<sf::VertexArray> innerVerts;
+    std::optional<sf::VertexArray> innerVerts;
 
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override
     {
         target.draw(this->verts, states);
+        if(this->innerVerts.has_value())
+            target.draw(this->innerVerts.value(), states);
     }
 public:
     Quad(
@@ -37,9 +39,9 @@ public:
         const sf::Vector2f &size,
         const sf::Color    &color,
               float        radius = 0.f,
-              unsigned int smoothness = 1)
-              //int           thickness = 0,
-        //const sf::Color    &innerColor = sf::Color::Black)
+              unsigned int smoothness = 1,
+              int           thickness = 0,
+        const sf::Color    &innerColor = sf::Color::Black)
         : verts{[&]()->sf::VertexArray
             {
                 sf::VertexArray temp;
@@ -68,10 +70,11 @@ public:
 
                     int cornerSwitch{0};
                     int circPointSwitch{1};
-                    double slice =
-                        {2 * std::numbers::pi / (temp.getVertexCount() - 6)};
-                    for(int i{0}; i < temp.getVertexCount(); ++i)
+                    std::size_t vertexCount{temp.getVertexCount()};
+                    double slice{2 * std::numbers::pi / (vertexCount - 6)};
+                    for(int i{0}; i < vertexCount; ++i)
                     {
+                        temp[i].color = color;
                         if(i == 0)
                             temp[i].position = position;
                         else if(i == 1)
@@ -125,150 +128,209 @@ public:
                     temp[4].position =
                         {position.x - half.x, position.y + half.y};
                     temp[5].position = position - half;
-                }
 
-                for(int i{0}; i < temp.getVertexCount(); ++i)
-                    temp[i].color = color;
+                    std::size_t vertexCount{temp.getVertexCount()};
+                    for(int i{0}; i < vertexCount; ++i)
+                        temp[i].color = color;
+                }
 
                 return temp;
             }()}
-        //, 
-    {}
-};
+        , innerVerts{[&]()-> std::optional<sf::VertexArray>
+            {
+                if(!thickness)
+                    return std::nullopt;
 
-// ROUNDED QUADS ///////////////////////////////////////////////////////////////
-class RoundedQuad : public sf::Drawable
-{
-    sf::VertexArray verts;
-    sf::VertexArray innerVerts;
-    std::size_t numberOfVerts;
-    float radius;
-    int thickness;
+                sf::Vector2f half{size.x * 0.5f, size.y * 0.5f};
+                std::size_t vertexCount{this->verts.getVertexCount()};
+                sf::VertexArray temp = this->verts;
+                int cornerSwitch{0};
+                for(int i{0}; i < vertexCount; ++i)
+                {
+                    if(i == vertexCount - 1)
+                        cornerSwitch = 0;
+                    temp[i].color = innerColor;
+                    if(i != 0)
+                    {
+                        // clockwise starting from bottom-right
+                        sf::Vector2f corners[4]{
+                            {static_cast<float>((position.x + half.x)-radius)
+                            ,static_cast<float>((position.y + half.y)-radius)},
+                            {static_cast<float>((position.x - half.x)+radius)
+                            ,static_cast<float>((position.y + half.y)-radius)},
+                            {static_cast<float>((position.x - half.x)+radius)
+                            ,static_cast<float>((position.y - half.y)+radius)},
+                            {static_cast<float>((position.x + half.x)-radius)
+                            ,static_cast<float>((position.y - half.y)+radius)}};
+                        st::Vector2D offset =
+                        {
+                            corners[cornerSwitch].x - this->verts[i].position.x,
+                            corners[cornerSwitch].y - this->verts[i].position.y
+                        };
+                        offset = st::normalize(offset);
+                        offset *= thickness;
+                        temp[i].position =
+                            {this->verts[i].position.x + offset.x
+                            ,this->verts[i].position.y + offset.y};
+                    }
 
-    void draw(sf::RenderTarget &target, sf::RenderStates states) const override
+                    if(i % ((vertexCount - 2) / 4) == false && i != 0)
+                        ++cornerSwitch;
+                }
+                return temp;
+            }()} {}
+
+    std::size_t getVertexCount() const {return this->verts.getVertexCount();}
+
+    sf::Vector2f getPosition() const {return this->verts[0].position;}
+
+    Quad& setPosition(const sf::Vector2f &position)
     {
-        target.draw(this->verts, states);
-        if(thickness)
-            target.draw(this->innerVerts, states);
+        sf::Vector2f posDiff{position - this->getPosition()};
+        std::size_t vertexCount{this->getVertexCount()};
+        for(int i{0}; i < vertexCount; ++i)
+            this->verts[i].position += posDiff;
+
+        if(this->innerVerts.has_value())
+            for(int i{0}; i < vertexCount; ++i)
+                (*this->innerVerts)[i].position += posDiff;
+
+        return *this;
     }
 
-public:
-    RoundedQuad(sf::Vector2f center, sf::Vector2f size, const sf::Color &color
-               ,int thickness = 0
-               ,const sf::Color &innerColor = sf::Color::Black
-               ,std::size_t numberOfVerts = 30, float radius = 10.f)
-        : verts{sf::PrimitiveType::TriangleFan, numberOfVerts}
-        , innerVerts{sf::PrimitiveType::TriangleFan
-            , numberOfVerts * !!thickness}
-        , numberOfVerts{numberOfVerts}
-        , radius{radius}
-        , thickness{thickness}
+    sf::Vector2f getSize() const
     {
-        if(numberOfVerts < 10)
-        {
-            st::msg_err("ERROR: Trying to create a RoundedQuad");
-            st::msg_err(" with less than 10 vertices!");
-            exit(-1);
-        }
-        // placing vertices
-        int cornerSwitch = 0;
-        int circPointsSwitch = 1;
-        double slice{2 * std::numbers::pi / (this->numberOfVerts - 6)};
-        // clockwise starting from bottom-right
-        sf::Vector2f cornerCenters[4]{
-            {static_cast<float>((center.x + size.x * 0.5f) - this->radius)
-            ,static_cast<float>((center.y + size.y * 0.5f) - this->radius)},
-            {static_cast<float>((center.x - size.x * 0.5f) + this->radius)
-            ,static_cast<float>((center.y + size.y * 0.5f) - this->radius)},
-            {static_cast<float>((center.x - size.x * 0.5f) + this->radius)
-            ,static_cast<float>((center.y - size.y * 0.5f) + this->radius)},
-            {static_cast<float>((center.x + size.x * 0.5f) - this->radius)
-            ,static_cast<float>((center.y - size.y * 0.5f) + this->radius)}};
+        int vertexCount{static_cast<int>(this->getVertexCount())};
+        int index_left{static_cast<int>(vertexCount * 0.5f)};
+        int index_bottom{static_cast<int>(std::floor(vertexCount * 0.25f))};
+        int index_top{index_bottom * 3};
+        
+        float width =
+            {this->verts[1].position.x - this->verts[index_left].position.x};
+        float height =
+            {this->verts[index_bottom].position.y
+            -this->verts[index_top].position.y};
 
-        for(int i{0}; i < this->numberOfVerts; i++)
+        return {width, height};
+    }
+
+    Quad& setSize(const sf::Vector2f &size)
+    {
+        sf::Vector2f sizeDiff{size - this->getSize()};
+        sf::Vector2f halfDiff{sizeDiff * 0.5f};
+        
+        std::size_t vertexCount{this->getVertexCount()};
+        if(vertexCount == 6)
         {
-            switch(i)
+            this->verts[1].position -= halfDiff;
+            this->verts[2].position.x += halfDiff.x;
+            this->verts[2].position.y -= halfDiff.y;
+            this->verts[3].position += halfDiff;
+            this->verts[4].position.x -= halfDiff.x;
+            this->verts[4].position.y += halfDiff.y;
+            this->verts[5].position = this->verts[1].position;
+
+            if(this->innerVerts.has_value())
             {
-                case 0:{this->verts[i].position = center; break;}
-                case 1:{this->verts[i].position
-                    = {cornerCenters[0].x + this->radius, cornerCenters[0].y};
-                    break;}
-                case 8:{this->verts[i].position
-                    = {cornerCenters[1].x, cornerCenters[1].y + this->radius};
-                    cornerSwitch++; break;}
-                case 15:{this->verts[i].position
-                    = {cornerCenters[2].x - this->radius, cornerCenters[2].y};
-                    cornerSwitch++; break;}
-                case 22:{this->verts[i].position
-                    = {cornerCenters[3].x, cornerCenters[3].y - this->radius};
-                    cornerSwitch++; break;}
-                case 29:{this->verts[i].position
-                    = {cornerCenters[0].x + this->radius, cornerCenters[0].y};
-                    break;}
-                default:{double angle{slice * circPointsSwitch};
-                    this->verts[i].position
-                        = {static_cast<float>(cornerCenters[cornerSwitch].x
-                            + this->radius * std::cos(angle))
-                        ,  static_cast<float>(cornerCenters[cornerSwitch].y
-                            + this->radius * std::sin(angle))};
-                    circPointsSwitch++; break;}
+                this->innerVerts->operator[](1).position -= halfDiff;
+                this->innerVerts->operator[](2).position.x += halfDiff.x;
+                this->innerVerts->operator[](2).position.y -= halfDiff.y;
+                this->innerVerts->operator[](3).position += halfDiff;
+                this->innerVerts->operator[](4).position.x -= halfDiff.x;
+                this->innerVerts->operator[](4).position.y += halfDiff.y;
+                this->innerVerts->operator[](5).position =
+                    this->innerVerts->operator[](1).position;
+            }
+
+            return *this;
+        }
+
+        int maxI_bottomRight{static_cast<int>(std::floor(vertexCount * 0.25f))};
+        int maxI_bottomLeft{maxI_bottomRight * 2};
+        int maxI_topLeft{maxI_bottomRight * 3};
+        int maxI_topRight{maxI_bottomRight * 4};
+        
+        for(int i{1}; i < vertexCount; ++i)
+        {
+            if(i == vertexCount - 1)
+            {
+                this->verts[i].position = this->verts[1].position;
+                if(this->innerVerts.has_value())
+                {
+                    (*this->innerVerts)[i].position =
+                        (*this->innerVerts)[1].position;
+                }
+            }
+            else if(i <= maxI_bottomRight)
+            {
+                this->verts[i].position += halfDiff;
+                if(this->innerVerts.has_value())
+                    (*this->innerVerts)[i].position += halfDiff;
+            }
+            else if(i <= maxI_bottomLeft && i > maxI_bottomRight)
+            {
+                this->verts[i].position.x -= halfDiff.x;
+                this->verts[i].position.y += halfDiff.y;
+                if(this->innerVerts.has_value())
+                {
+                    (*this->innerVerts)[i].position.x -= halfDiff.x;
+                    (*this->innerVerts)[i].position.y += halfDiff.y;
+                }
+            }
+            else if(i <= maxI_topLeft && i > maxI_bottomLeft)
+            {
+                this->verts[i].position -= halfDiff;
+                if(this->innerVerts.has_value())
+                    (*this->innerVerts)[i].position -= halfDiff;
+            }
+            else
+            {
+                this->verts[i].position.x += halfDiff.x;
+                this->verts[i].position.y -= halfDiff.y;
+                if(this->innerVerts.has_value())
+                {
+                    (*this->innerVerts)[i].position.x += halfDiff.x;
+                    (*this->innerVerts)[i].position.y -= halfDiff.y;
+                }
             }
         }
-        // set color
-        for(int i{0}; i < this->numberOfVerts; i++)
+        return *this;
+    }
+
+    sf::Color getColor() const {return this->verts[0].color;}
+    std::optional<sf::Color> getInnerColor() const
+    {
+        if(this->innerVerts.has_value())
+            return (*this->innerVerts)[0].color;
+        return std::nullopt;
+    }
+
+    Quad& setColor(const sf::Color &color)
+    {
+        std::size_t vertexCount{this->getVertexCount()};
+        for(int i{0}; i < vertexCount; ++i)
             this->verts[i].color = color;
 
-        // create inner quad to make original quad appear as outline with
-        // thickness
-        if(thickness == 0)
-            return;
-
-        cornerSwitch = 0;
-        for(int i{0}; i < this->numberOfVerts; i++)
-        {
-            this->innerVerts[i].color = innerColor;
-            if(i == 0)
-            {
-                this->innerVerts[i].position = center;
-                continue;
-            }
-            if(i == this->numberOfVerts - 1)
-            {
-                this->innerVerts[i].position = this->innerVerts[1].position;
-                break;
-            }
-
-            st::Vector2D offset{
-                cornerCenters[cornerSwitch].x - this->verts[i].position.x,
-                cornerCenters[cornerSwitch].y - this->verts[i].position.y};
-            offset = st::normalize(offset);
-            offset *= thickness;
-            this->innerVerts[i].position = {
-                this->verts[i].position.x + offset.x,
-                this->verts[i].position.y + offset.y};
-
-            if(i % ((numberOfVerts - 2) / 4) == false)
-                cornerSwitch++;
-        }
+        return *this;
     }
 
-    sf::Vector2f getCenter()
+    Quad& setInnerColor(const sf::Color &color)
     {
-        return this->verts[0].position;
-    }
-
-    void setCenter(const sf::Vector2f &center)
-    {
-        sf::Vector2f position_difference(
-            center.x - this->verts[0].position.x,
-            center.y - this->verts[0].position.y);
-        for(int i{0}; i < this->numberOfVerts; i++)
+        if(this->innerVerts.has_value() == false)
         {
-            this->verts[i].position.x += position_difference.x;
-            this->verts[i].position.y += position_difference.y;
+            st::msg_warn("Trying to set innerColor for a quad that does not"
+                " have thickness and therefore inner elements.");
+            return *this;
         }
+        
+        std::size_t vertexCount{this->getVertexCount()};
+        for(int i{0}; i < vertexCount; ++i)
+            (*this->innerVerts)[i].color = color;
+
+        return *this;
     }
 };
+
 // TEXTURES ////////////////////////////////////////////////////////////////////
 struct Textures : public sf::Texture
 {
@@ -534,7 +596,7 @@ struct Buttons
 
     Button& operator [](int index) {return this->buttons[index];}
 };
-/*..............................................................................
+
 // QUADS ///////////////////////////////////////////////////////////////////////
 class Quads : public sf::Drawable
 {
@@ -779,7 +841,7 @@ public:
         return iter;
     }
 };
-..............................................................................*/
+
 // INPUT FIELD /////////////////////////////////////////////////////////////////
 class InputField : public sf::Drawable
 {

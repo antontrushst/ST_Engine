@@ -14,7 +14,10 @@ MainWindow::MainWindow()
 
 void MainWindow::init()
 {
-    st_sfml::Quad q{{500.f,300.f}, {400.f,200.f}, sf::Color::Black, 30.f, 20};
+    st_sfml::Quad q{{500.f,300.f}, {428.f,203.f}, sf::Color::Black, 60.f, 3,
+        15, sf::Color::Red};
+    q.setColor(sf::Color::Magenta).setInnerColor(sf::Color::Yellow);
+    q.setPosition({750.f, 400.f}).setColor(sf::Color::Blue);
     // MAIN LOOP
     while(this->window.isOpen())
     {
