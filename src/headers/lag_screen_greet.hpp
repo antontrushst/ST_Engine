@@ -14,10 +14,12 @@ class Screen_Greet
 public:
     Screen_Greet(const sf::Texture &image);
 
-    Screen_Greet& handleEvents(const std::optional<sf::Event> &event,
+    void handleEvents(const std::optional<sf::Event> &event,
         sf::RenderWindow &window);
-    Screen_Greet& draw(sf::RenderWindow &window);
-    Screen_Greet& updatePositions(const sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window);
+    void updatePositions(const sf::RenderWindow &window);
+    void create_lag_file(const std::filesystem::path &path,
+        const std::string &name);
 };
 
 #endif

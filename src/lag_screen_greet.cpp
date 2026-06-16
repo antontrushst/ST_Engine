@@ -7,7 +7,7 @@ Screen_Greet::Screen_Greet(
     , LagniaImage{image}
     , buttons{{
         {"newProject",
-            {EngineConfig::getInstance().mainWindow_width / 2.f,
+            {EngineConfig::getInstance().mainWindow_width * 0.5f,
                 (EngineConfig::getInstance().mainWindow_height * 0.01f) *
                 85 - 55},
             {400.f, 50.f},
@@ -15,7 +15,7 @@ Screen_Greet::Screen_Greet(
             EngineConfig::getInstance().backColor,
             EngineConfig::getInstance().secondaryColor},
         {"openProject",
-            {EngineConfig::getInstance().mainWindow_width / 2.f,
+            {EngineConfig::getInstance().mainWindow_width * 0.5f,
                 (EngineConfig::getInstance().mainWindow_height * 0.01f) * 85},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "open", 32,
@@ -51,7 +51,7 @@ Screen_Greet::Screen_Greet(
     this->subTitle.setFillColor(EngineConfig::getInstance().secondaryColor);
 }
 
-Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
+void Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
     sf::RenderWindow &window)
 {
     this->buttons["newProject"].
@@ -70,7 +70,6 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
             event->getIf<sf::Event::MouseButtonPressed>())
             if(mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
-                /*--------------------------------*/
                 if(std::optional<std::string> gameName{st_sfml::inputPopup(
                     window, EngineConfig::getInstance().font,
                     "Enter name of your game:",
@@ -83,11 +82,15 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
                     std::string newProject_path{
                         st::getFolder("Select a folder for your game project "
                         "directory to be created in").value_or("")};
-                    std::cout << newProject_path << std::endl;
+                    if(newProject_path.empty())
+                        return;
+
+                    std::filesystem::create_directory(newProject_path + "/" +
+                        gameName.value());
+                    this->create_lag_file({newProject_path + "/" +
+                        gameName.value()}, gameName.value());
                 }
             }
-
-        return *this;
     }
 
     if(this->buttons["openProject"].contains({(float)mousePosition.x,
@@ -95,13 +98,11 @@ Screen_Greet& Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
     {
         this->buttons["openProject"].setColor(
             EngineConfig::getInstance().mainColor);
-        return *this;
+        return;
     }
-
-    return *this;
 }
 
-Screen_Greet& Screen_Greet::draw(sf::RenderWindow &window)
+void Screen_Greet::draw(sf::RenderWindow &window)
 {
     for(int i{0}; i < this->buttons.buttons.size(); i++)
         window.draw(this->buttons[i]);
@@ -109,10 +110,9 @@ Screen_Greet& Screen_Greet::draw(sf::RenderWindow &window)
     window.draw(this->LagniaImage);
     window.draw(this->title);
     window.draw(this->subTitle);
-    return *this;
 }
 
-Screen_Greet& Screen_Greet::updatePositions(const sf::RenderWindow &window)
+void Screen_Greet::updatePositions(const sf::RenderWindow &window)
 {
     this->LagniaImage.setPosition({
         (float)window.getSize().x * 0.5f,
@@ -128,5 +128,13 @@ Screen_Greet& Screen_Greet::updatePositions(const sf::RenderWindow &window)
     this->buttons["newProject"].setPosition({(float)window.getSize().x * 0.5f,
         this->buttons["openProject"].getPosition().y -
         (this->buttons["newProject"].getSize().y + 30)});
-    return *this;
+}
+
+void Screen_Greet::create_lag_file(const std::filesystem::path &path,
+    const std::string &name)
+{
+    std::ofstream lag_file{path.string() + "/" + name + ".lag"};
+    lag_file << "GameName=" << name << "\n";
+    lag_file << "ProjectLocation=" << path << "\n";
+    lag_file.close();
 }

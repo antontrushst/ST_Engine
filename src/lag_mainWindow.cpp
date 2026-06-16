@@ -14,6 +14,7 @@ MainWindow::MainWindow()
 
 void MainWindow::init()
 {
+    st_sfml::Quad q{{500.f,300.f}, {400.f,200.f}, sf::Color::Black, 30.f, 20};
     // MAIN LOOP
     while(this->window.isOpen())
     {
@@ -22,6 +23,7 @@ void MainWindow::init()
         this->window.clear(EngineConfig::getInstance().backColor);
     //  CLEARED SCREEN  ////////////////////////////////////////////////////////
         this->screen_greet.draw(this->window);
+        this->window.draw(q);
     //  READY TO DISPLAY  //////////////////////////////////////////////////////
         this->window.display();
     }

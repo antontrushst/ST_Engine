@@ -5,6 +5,8 @@
 #include <iostream>
 #include <filesystem>
 #include <string>
+#include <string_view>
+#include <source_location>
 #include <vector>
 #include <shlobj.h>
 #include <objbase.h>
@@ -13,7 +15,7 @@
 namespace st
 {
     // MESSAGES ////////////////////////////////////////////////////////////////
-    inline void msg_ok(const std::string text)
+    inline void msg_ok(std::string_view text)
     {
         #if defined(_WIN32) || defined(_WIN64)
         
@@ -31,7 +33,8 @@ namespace st
         std::cout << "\033[32m" << text << "\033[0m" << std::endl;
     }
 
-    inline void msg_err(const std::string text)
+    inline void msg_err(std::string_view text,
+        const std::source_location location = std::source_location::current())
     {
         #if defined(_WIN32) || defined(_WIN64)
         
@@ -40,22 +43,23 @@ namespace st
             GetConsoleScreenBufferInfo(hConsole, &cbinfo);
             int originalColor = cbinfo.wAttributes;
             SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
-            std::cout << "ERROR in file " << __FILE__ <<
-            " in function " << __func__ <<
-            " on line " << std::to_string(__LINE__) << "!\n";
+            std::cout << "ERROR in file " << location.file_name() <<
+            " in function " << location.function_name() <<
+            " on line " << location.line() << "!\n";
             std::cout << text << std::endl;
             SetConsoleTextAttribute(hConsole, originalColor);
             return;
 
         #endif
 
-        std::cout << "\033[31m" << "ERROR in file " << __FILE__ <<
-            " in function " << __func__ <<
-            " on line " << std::to_string(__LINE__) << "!\n" <<
+        std::cout << "\033[31m" << "ERROR in file " << location.file_name() <<
+            " in function " << location.function_name() <<
+            " on line " << location.line() << "!\n" <<
             text << "\033[0m" << std::endl;
     }
 
-    inline void msg_warn(const std::string text)
+    inline void msg_warn(std::string_view text,
+        const std::source_location location = std::source_location::current())
     {
         #if defined(_WIN32) || defined(_WIN64)
         
@@ -64,18 +68,18 @@ namespace st
             GetConsoleScreenBufferInfo(hConsole, &cbinfo);
             int originalColor = cbinfo.wAttributes;
             SetConsoleTextAttribute(hConsole, 6);
-            std::cout << "Warning in file " << __FILE__ <<
-            " in function " << __func__ <<
-            " on line " << std::to_string(__LINE__) << "!\n";
+            std::cout << "Warning in file " << location.file_name() <<
+            " in function " << location.function_name() <<
+            " on line " << location.line() << "!\n";
             std::cout << text << std::endl;
             SetConsoleTextAttribute(hConsole, originalColor);
             return;
 
         #endif
 
-        std::cout << "\033[33m" << "Warning in file " << __FILE__ <<
-            " in function " << __func__ <<
-            " on line " << std::to_string(__LINE__) << "!\n" <<
+        std::cout << "\033[33m" << "Warning in file " << location.file_name() <<
+            " in function " << location.function_name() <<
+            " on line " << location.line() << "!\n" <<
             text << "\033[0m" << std::endl;
     }
     // CONVERTER STD::STRING TO STD::WSTRING ///////////////////////////////////
@@ -144,7 +148,7 @@ namespace st
         hr = pFileOpen->Show(NULL);
         if(!SUCCEEDED(hr))
         {
-            msg_warn("Warning: GetFolder Failed! Couldn't show dialog!");
+            msg_warn("Warning: GetFolder was canceled!");
             return std::nullopt;
         }
 

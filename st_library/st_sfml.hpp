@@ -21,6 +21,121 @@
 
 namespace st_sfml
 {
+// QUAD ////////////////////////////////////////////////////////////////////////
+class Quad : public sf::Drawable
+{
+    sf::VertexArray verts;
+    //std::optional<sf::VertexArray> innerVerts;
+
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override
+    {
+        target.draw(this->verts, states);
+    }
+public:
+    Quad(
+        const sf::Vector2f &position,
+        const sf::Vector2f &size,
+        const sf::Color    &color,
+              float        radius = 0.f,
+              unsigned int smoothness = 1)
+              //int           thickness = 0,
+        //const sf::Color    &innerColor = sf::Color::Black)
+        : verts{[&]()->sf::VertexArray
+            {
+                sf::VertexArray temp;
+                sf::Vector2f half{size.x * 0.5f, size.y * 0.5f};
+                if(radius)
+                {
+                    // formula for number of verts:
+                    // 2 - center point + closing point
+                    // 8 - each corner start and end
+                    // 4 - each corner curve middle point
+                    // smoothness - zero will negate curvature, otherwise sets
+                    // number of corner curvature points
+                    temp = sf::VertexArray{sf::PrimitiveType::TriangleFan,
+                        2 + 8 + 4 * smoothness};
+
+                    // clockwise starting from bottom-right
+                    sf::Vector2f corners[4]{
+                        {static_cast<float>((position.x + half.x) - radius)
+                        ,static_cast<float>((position.y + half.y) - radius)},
+                        {static_cast<float>((position.x - half.x) + radius)
+                        ,static_cast<float>((position.y + half.y) - radius)},
+                        {static_cast<float>((position.x - half.x) + radius)
+                        ,static_cast<float>((position.y - half.y) + radius)},
+                        {static_cast<float>((position.x + half.x) - radius)
+                        ,static_cast<float>((position.y - half.y) + radius)}};
+
+                    int cornerSwitch{0};
+                    int circPointSwitch{1};
+                    double slice =
+                        {2 * std::numbers::pi / (temp.getVertexCount() - 6)};
+                    for(int i{0}; i < temp.getVertexCount(); ++i)
+                    {
+                        if(i == 0)
+                            temp[i].position = position;
+                        else if(i == 1)
+                            temp[i].position =
+                                {corners[cornerSwitch].x + radius
+                                ,corners[cornerSwitch].y};
+                        else if(i == 3 + smoothness)
+                        {
+                            cornerSwitch++;
+                            temp[i].position =
+                                {corners[cornerSwitch].x
+                                ,corners[cornerSwitch].y + radius};
+                        }
+                        else if(i == 5 + smoothness * 2)
+                        {
+                            cornerSwitch++;
+                            temp[i].position =
+                                {corners[cornerSwitch].x - radius
+                                ,corners[cornerSwitch].y};
+                        }
+                        else if(i == 7 + smoothness * 3)
+                        {
+                            cornerSwitch++;
+                            temp[i].position =
+                                {corners[cornerSwitch].x
+                                ,corners[cornerSwitch].y - radius};
+                        }
+                        else if(i == 9 + smoothness * 4)
+                            temp[i].position = temp[1].position;
+                        else
+                        {
+                            double angle{slice * circPointSwitch};
+                            temp[i].position =
+                                {static_cast<float>(corners[cornerSwitch].x
+                                    + radius * std::cos(angle))
+                                ,static_cast<float>(corners[cornerSwitch].y
+                                    + radius * std::sin(angle))};
+                            circPointSwitch++;
+                        }
+                    }
+                }
+                else
+                {
+                    temp = sf::VertexArray{sf::PrimitiveType::TriangleFan, 6};
+
+                    temp[0].position = position;
+                    temp[1].position = position - half;
+                    temp[2].position =
+                        {position.x + half.x, position.y - half.y};
+                    temp[3].position = position + half;
+                    temp[4].position =
+                        {position.x - half.x, position.y + half.y};
+                    temp[5].position = position - half;
+                }
+
+                for(int i{0}; i < temp.getVertexCount(); ++i)
+                    temp[i].color = color;
+
+                return temp;
+            }()}
+        //, 
+    {}
+};
+
 // ROUNDED QUADS ///////////////////////////////////////////////////////////////
 class RoundedQuad : public sf::Drawable
 {
@@ -41,7 +156,7 @@ public:
     RoundedQuad(sf::Vector2f center, sf::Vector2f size, const sf::Color &color
                ,int thickness = 0
                ,const sf::Color &innerColor = sf::Color::Black
-               ,std::size_t numberOfVerts = 30, float radius = 100.f)
+               ,std::size_t numberOfVerts = 30, float radius = 10.f)
         : verts{sf::PrimitiveType::TriangleFan, numberOfVerts}
         , innerVerts{sf::PrimitiveType::TriangleFan
             , numberOfVerts * !!thickness}
@@ -419,6 +534,7 @@ struct Buttons
 
     Button& operator [](int index) {return this->buttons[index];}
 };
+/*..............................................................................
 // QUADS ///////////////////////////////////////////////////////////////////////
 class Quads : public sf::Drawable
 {
@@ -663,7 +779,7 @@ public:
         return iter;
     }
 };
-
+..............................................................................*/
 // INPUT FIELD /////////////////////////////////////////////////////////////////
 class InputField : public sf::Drawable
 {
@@ -989,6 +1105,12 @@ inline std::optional<std::string> inputPopup(
     }
     return std::nullopt;
 }
+
+// SUB_WINDOW //////////////////////////////////////////////////////////////////
+class SubWin : public sf::Drawable
+{
+
+};
 
 }
 #endif
