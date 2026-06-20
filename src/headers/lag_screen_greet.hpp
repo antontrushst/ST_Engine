@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "st_sfml.hpp"
 #include "lag_config.hpp"
+#include "lag_file.hpp"
 
 class Screen_Greet
 {

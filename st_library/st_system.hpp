@@ -108,7 +108,8 @@ namespace st
         #endif
     }
     // OPEN FOLDER /////////////////////////////////////////////////////////////
-    inline std::optional<std::string> getFolder(const std::string &title = "")
+    inline std::optional<std::filesystem::path> getFolder(
+        const std::string &title = "")
     {
         HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED
             | COINIT_DISABLE_OLE1DDE);
@@ -179,7 +180,7 @@ namespace st
         pFileOpen->Release();
         CoUninitialize();
 
-        return std::string(ansiBuffer.data());
+        return std::filesystem::path{ansiBuffer.data()};
     }
 }
 

@@ -79,16 +79,15 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
                     EngineConfig::getInstance().altColor)};
                     gameName.has_value())
                 {
-                    std::string newProject_path{
+                    std::filesystem::path newProject_path{
                         st::getFolder("Select a folder for your game project "
                         "directory to be created in").value_or("")};
                     if(newProject_path.empty())
                         return;
 
-                    std::filesystem::create_directory(newProject_path + "/" +
-                        gameName.value());
-                    this->create_lag_file({newProject_path + "/" +
-                        gameName.value()}, gameName.value());
+                    std::filesystem::create_directory(
+                        newProject_path /= gameName.value());
+                    LagFile::get().create(newProject_path, gameName.value());
                 }
             }
     }
@@ -130,11 +129,11 @@ void Screen_Greet::updatePositions(const sf::RenderWindow &window)
         (this->buttons["newProject"].getSize().y + 30)});
 }
 
-void Screen_Greet::create_lag_file(const std::filesystem::path &path,
+/*void Screen_Greet::create_lag_file(const std::filesystem::path &path,
     const std::string &name)
 {
     std::ofstream lag_file{path.string() + "/" + name + ".lag"};
     lag_file << "GameName=" << name << "\n";
     lag_file << "ProjectLocation=" << path << "\n";
     lag_file.close();
-}
+}*/
