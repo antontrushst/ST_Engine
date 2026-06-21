@@ -11,6 +11,7 @@
 #include <shlobj.h>
 #include <objbase.h>
 #include <optional>
+#include <initializer_list>
 
 namespace st
 {
@@ -138,6 +139,107 @@ namespace st
 
         hr = pFileOpen->SetOptions(dwFlags | FOS_FORCEFILESYSTEM |
             FOS_PICKFOLDERS);
+
+        // set custom window title if provided
+        if(!title.empty())
+        {
+            pFileOpen->SetTitle(convertToWString(title).c_str());
+        }
+        // ...................................
+
+        hr = pFileOpen->Show(NULL);
+        if(!SUCCEEDED(hr))
+        {
+            msg_warn("Warning: GetFolder was canceled!");
+            return std::nullopt;
+        }
+
+        IShellItem *pItem;
+        hr = pFileOpen->GetResult(&pItem);
+        if(!SUCCEEDED(hr))
+        {
+            msg_warn("Warning: GetFolder Failed! Couldn't get results!");
+            return std::nullopt;
+        }
+
+        PWSTR pszFilePath;
+        hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+        if(!SUCCEEDED(hr))
+        {
+            msg_warn("Warning: GetFolder Failed! Couldn't get display name!");
+            return std::nullopt;
+        }
+
+        int bufferSize = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, NULL,
+            0, NULL, NULL);
+        std::vector<char> ansiBuffer(bufferSize);
+        WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, ansiBuffer.data(),
+            bufferSize, NULL, NULL);
+
+        CoTaskMemFree(pszFilePath);
+        pItem->Release();
+        pFileOpen->Release();
+        CoUninitialize();
+
+        return std::filesystem::path{ansiBuffer.data()};
+    }
+
+    // GET FILE /////////////////////////////////////////////////////////////
+    inline std::optional<std::filesystem::path> getFile(
+        const std::string &title = "",
+        std::initializer_list<std::string> extensions = {},
+        std::initializer_list<std::string> ext_names = {})
+    {
+        HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED
+            | COINIT_DISABLE_OLE1DDE);
+        if(!SUCCEEDED(hr))
+        {
+            msg_warn("Warning: GetFolder Failed! Handle not initialized!");
+            return std::nullopt;
+        }
+
+        IFileOpenDialog *pFileOpen;
+        hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER,
+            IID_PPV_ARGS(&pFileOpen));
+        if(!SUCCEEDED(hr))
+        {
+            msg_warn("Warning: GetFolder Failed! Handle instance not created!");
+            return std::nullopt;
+        }
+
+        if(extensions.size() == 0)
+        {
+            msg_err("No extensions supplied!");
+            exit(-1);
+        }
+        
+        if(extensions.size() != ext_names.size())
+        {
+            msg_err("Extensions mismatch extension names!");
+            exit(-1);
+        }
+        
+        COMDLG_FILTERSPEC fileTypes[extensions.size()];
+        for(int i{0}; i < extensions.size(); ++i)
+        {
+            fileTypes[i].pszName =
+                convertToWString(ext_names.begin()[i]).c_str();
+            fileTypes[i].pszSpec =
+                convertToWString(extensions.begin()[i]).c_str();
+        }
+
+        pFileOpen->SetFileTypes(ARRAYSIZE(fileTypes), fileTypes);
+
+        DWORD dwFlags;
+        hr = pFileOpen->GetOptions(&dwFlags);
+        if(!SUCCEEDED(hr))
+        {
+            msg_warn("Warning: GetFolder Failed! Couldn't get handle options!");
+            return std::nullopt;
+        }
+
+        hr = pFileOpen->SetOptions(dwFlags | FOS_FORCEFILESYSTEM |
+            FOS_STRICTFILETYPES);
 
         // set custom window title if provided
         if(!title.empty())

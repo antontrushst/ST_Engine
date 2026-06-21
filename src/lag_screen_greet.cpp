@@ -66,7 +66,7 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
         this->buttons["newProject"].setColor(
             EngineConfig::getInstance().mainColor);
 
-        if(const auto* mouseButtonPressed =
+        if(const auto *mouseButtonPressed =
             event->getIf<sf::Event::MouseButtonPressed>())
             if(mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
@@ -97,6 +97,19 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
     {
         this->buttons["openProject"].setColor(
             EngineConfig::getInstance().mainColor);
+
+        if(const auto *mouseButtonPressed =
+            event->getIf<sf::Event::MouseButtonPressed>())
+            if(mouseButtonPressed->button == sf::Mouse::Button::Left)
+            {
+                std::filesystem::path lagFile_path{
+                    st::getFile("Select your game project .lag file",
+                    {"*.lag"}, {"Lagnia files (*.lag)"}).value_or("")};
+                if(lagFile_path.empty())
+                    return;
+
+                LagFile::get().load(lagFile_path);
+            }
         return;
     }
 }
