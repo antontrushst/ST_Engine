@@ -337,7 +337,7 @@ struct Textures : public sf::Texture
     const std::vector<sf::Texture> textures;
     const std::vector<std::string> names;
 
-    Textures(const std::string &folderPath)
+    Textures(const std::filesystem::path &folderPath)
         : textures([&]() -> std::vector<sf::Texture>
             {
                 namespace fs = std::filesystem;

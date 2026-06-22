@@ -17,18 +17,15 @@ struct EngineConfig
     int mainWindow_minWidth = 300;
     int mainWindow_minHeight = 300;
     int framerate = 60;
-    sf::Font font{std::string{
-        st::getThisProgramLocation() + "fonts\\Proletarsk.ttf"}};
-    sf::Font titleFont{std::string{
-        st::getThisProgramLocation() + "fonts\\logo_2K12.ttf"}};
-    st_sfml::Textures buttonIcons{std::string{
-        st::getThisProgramLocation() + "graphics"}};
+    sf::Font font{st::getThisProgramLocation() /= "fonts/Proletarsk.ttf"};
+    sf::Font titleFont{st::getThisProgramLocation() /= "fonts/logo_2K12.ttf"};
+    st_sfml::Textures buttonIcons{st::getThisProgramLocation() /= "graphics"};
     sf::Color mainColor = color::Toxic;
     sf::Color altColor = color::Crimson;
     sf::Color secondaryColor = color::SoftBlack;
     sf::Color backColor = color::Milk;
 
-    EngineConfig& loadEngineConfig(const std::string &path);
+    EngineConfig& loadEngineConfig(const std::filesystem::path &path);
 
     static EngineConfig& getInstance()
     {
@@ -42,7 +39,8 @@ private:
     EngineConfig() = default;
 };
 
-inline EngineConfig& EngineConfig::loadEngineConfig(const std::string &path)
+inline EngineConfig& EngineConfig::loadEngineConfig(
+    const std::filesystem::path &path)
 {
     enum class keys
     {

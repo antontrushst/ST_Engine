@@ -97,7 +97,7 @@ namespace st
         return result;
     }
     // GET CURRENT PROGRAM LOCATION ////////////////////////////////////////////
-    inline std::string getThisProgramLocation()
+    inline std::filesystem::path getThisProgramLocation()
     {
         #if defined(_WIN32) || defined(_WIN64)
             char C_path[MAX_PATH];
@@ -105,7 +105,7 @@ namespace st
             std::string path = C_path;
             size_t preNameChar = path.rfind("\\");
             path.erase(preNameChar + 1);
-            return path;
+            return std::filesystem::path{path};
         #endif
     }
     // OPEN FOLDER /////////////////////////////////////////////////////////////

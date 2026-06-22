@@ -6,7 +6,7 @@ MainWindow::MainWindow()
             , static_cast<unsigned int>(
                 EngineConfig::getInstance().mainWindow_height)})
         , "Lagnia"))
-    , textures{{st::getThisProgramLocation() + "graphics"}}
+    , textures{{st::getThisProgramLocation() /= "graphics"}}
     , screen_greet{this->textures["lagnia_sketch_transp"]}
 {
     this->window.setFramerateLimit(EngineConfig::getInstance().framerate);

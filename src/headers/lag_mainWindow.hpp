@@ -13,6 +13,10 @@ class MainWindow
     sf::RenderWindow window;
     st_sfml::Textures textures;
     Screen_Greet screen_greet;
+    enum class Screens
+    {
+        Greet, Scene
+    };
     
 public:
     MainWindow();

@@ -5,8 +5,7 @@
 int main()
 {
     EngineConfig::getInstance().
-        loadEngineConfig(std::string{st::getThisProgramLocation()
-            + "lag_config.cfg"});
+        loadEngineConfig(st::getThisProgramLocation() /= "lag_config.cfg");
     MainWindow mainWindow;
     mainWindow.init();
 
