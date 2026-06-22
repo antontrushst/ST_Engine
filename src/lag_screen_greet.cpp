@@ -1,22 +1,19 @@
 #include "lag_screen_greet.hpp"
 
-Screen_Greet::Screen_Greet(
-    const sf::Texture  &image)
-    : title{EngineConfig::getInstance().titleFont, "LAGNIA", 96}
+Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture  &image)
+    : window{window}
+    , title{EngineConfig::getInstance().titleFont, "LAGNIA", 96}
     , subTitle{EngineConfig::getInstance().titleFont, "game engine", 36}
     , LagniaImage{image}
     , buttons{{
         {"newProject",
-            {EngineConfig::getInstance().mainWindow_width * 0.5f,
-                (EngineConfig::getInstance().mainWindow_height * 0.01f) *
-                85 - 55},
+            {window.getSize().x * 0.5f, (window.getSize().y * 0.01f) * 85 - 55},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "new", 32,
             EngineConfig::getInstance().backColor,
             EngineConfig::getInstance().secondaryColor},
         {"openProject",
-            {EngineConfig::getInstance().mainWindow_width * 0.5f,
-                (EngineConfig::getInstance().mainWindow_height * 0.01f) * 85},
+            {window.getSize().x * 0.5f, (window.getSize().y * 0.01f) * 85},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "open", 32,
             EngineConfig::getInstance().backColor,
@@ -28,16 +25,14 @@ Screen_Greet::Screen_Greet(
         this->LagniaImage.getLocalBounds().position};
     this->LagniaImage.setOrigin(centeredOrigin);
     this->LagniaImage.setPosition({
-        EngineConfig::getInstance().mainWindow_width * 0.5f,
-        EngineConfig::getInstance().mainWindow_height * 0.5f});
+        window.getSize().x * 0.5f, window.getSize().y * 0.5f});
     // center title and subTitle texts, color and position it
     centeredOrigin = this->title.getGlobalBounds().size * 0.5f +
         this->title.getLocalBounds().position;
     this->title.setOrigin({std::round(centeredOrigin.x),
         std::round(centeredOrigin.y)});
     this->title.setPosition({
-        EngineConfig::getInstance().mainWindow_width * 0.5f,
-        (EngineConfig::getInstance().mainWindow_height * 0.01f) * 15});
+        window.getSize().x * 0.5f, (window.getSize().y * 0.01f) * 15});
     this->title.setFillColor(EngineConfig::getInstance().secondaryColor);
 
     centeredOrigin = this->subTitle.getGlobalBounds().size * 0.5f +
@@ -45,20 +40,19 @@ Screen_Greet::Screen_Greet(
     this->subTitle.setOrigin({std::round(centeredOrigin.x),
         std::round(centeredOrigin.y)});
     this->subTitle.setPosition({
-        EngineConfig::getInstance().mainWindow_width * 0.5f,
+        window.getSize().x * 0.5f,
         this->title.getPosition().y + this->title.getLocalBounds().size.y +
         5.f});
     this->subTitle.setFillColor(EngineConfig::getInstance().secondaryColor);
 }
 
-void Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
-    sf::RenderWindow &window)
+void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
 {
     this->buttons["newProject"].
         setColor(EngineConfig::getInstance().secondaryColor);
     this->buttons["openProject"].
         setColor(EngineConfig::getInstance().secondaryColor);
-    sf::Vector2i mousePosition{sf::Mouse::getPosition(window)};
+    sf::Vector2i mousePosition{sf::Mouse::getPosition(this->window)};
 
     if(this->buttons["newProject"].contains({(float)mousePosition.x,
         (float)mousePosition.y}))
@@ -114,39 +108,33 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event,
     }
 }
 
-void Screen_Greet::draw(sf::RenderWindow &window)
+void Screen_Greet::draw()
 {
     for(int i{0}; i < this->buttons.buttons.size(); i++)
-        window.draw(this->buttons[i]);
+        this->window.draw(this->buttons[i]);
 
-    window.draw(this->LagniaImage);
-    window.draw(this->title);
-    window.draw(this->subTitle);
+    this->window.draw(this->LagniaImage);
+    this->window.draw(this->title);
+    this->window.draw(this->subTitle);
 }
 
-void Screen_Greet::updatePositions(const sf::RenderWindow &window)
+void Screen_Greet::updatePositions()
 {
     this->LagniaImage.setPosition({
-        (float)window.getSize().x * 0.5f,
-        (float)window.getSize().y * 0.5f});
+        (float)this->window.getSize().x * 0.5f,
+        (float)this->window.getSize().y * 0.5f});
     this->title.setPosition({
-        (float)window.getSize().x * 0.5f, (window.getSize().y * 0.01f) * 15});
+        (float)this->window.getSize().x * 0.5f,
+        (this->window.getSize().y * 0.01f) * 15});
     this->subTitle.setPosition({
-        (float)window.getSize().x * 0.5f, this->title.getPosition().y +
+        (float)this->window.getSize().x * 0.5f, this->title.getPosition().y +
         this->title.getLocalBounds().size.y + 5.f});
 
-    this->buttons["openProject"].setPosition({(float)window.getSize().x * 0.5f,
-        ((float)window.getSize().y * 0.01f) * 85});
-    this->buttons["newProject"].setPosition({(float)window.getSize().x * 0.5f,
+    this->buttons["openProject"].setPosition({
+        (float)this->window.getSize().x * 0.5f,
+        ((float)this->window.getSize().y * 0.01f) * 85});
+    this->buttons["newProject"].setPosition({
+        (float)this->window.getSize().x * 0.5f,
         this->buttons["openProject"].getPosition().y -
-        (this->buttons["newProject"].getSize().y + 30)});
+            (this->buttons["newProject"].getSize().y + 30)});
 }
-
-/*void Screen_Greet::create_lag_file(const std::filesystem::path &path,
-    const std::string &name)
-{
-    std::ofstream lag_file{path.string() + "/" + name + ".lag"};
-    lag_file << "GameName=" << name << "\n";
-    lag_file << "ProjectLocation=" << path << "\n";
-    lag_file.close();
-}*/

@@ -13,6 +13,7 @@ public:
     Screen_Scene(sf::RenderWindow &window);
 
     void draw();
+    void handleEvents(const std::optional<sf::Event> &event);
 };
 
 #endif

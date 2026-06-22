@@ -13,7 +13,7 @@ InGameDisplay::InGameDisplay(
 {}
 
 void InGameDisplay::draw(sf::RenderTarget &target,
-    sf::RenderStates states) const override
+    sf::RenderStates states) const
 {
     target.draw(this->shape, states);
 }

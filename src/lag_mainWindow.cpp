@@ -7,7 +7,9 @@ MainWindow::MainWindow()
                 EngineConfig::getInstance().mainWindow_height)})
         , "Lagnia"))
     , textures{{st::getThisProgramLocation() /= "graphics"}}
-    , screen_greet{this->textures["lagnia_sketch_transp"]}
+    , screen_greet{this->window, this->textures["lagnia_sketch_transp"]}
+    , screen_scene{this->window}
+    , currentScreen{Screens::Greet}
 {
     this->window.setFramerateLimit(EngineConfig::getInstance().framerate);
 }
@@ -21,7 +23,11 @@ void MainWindow::init()
 
         this->window.clear(EngineConfig::getInstance().backColor);
     //  CLEARED SCREEN  ////////////////////////////////////////////////////////
-        this->screen_greet.draw(this->window);
+        switch(this->currentScreen)
+        {
+            case Screens::Greet:this->screen_greet.draw(); break;
+            case Screens::Scene:this->screen_scene.draw(); break;
+        }
     //  READY TO DISPLAY  //////////////////////////////////////////////////////
         this->window.display();
     }
@@ -41,9 +47,13 @@ void MainWindow::handleEvents()
                 {(float)resized->size.x, (float)resized->size.y}};
             this->window.setView(sf::View(visibleArea));
 
-            this->screen_greet.updatePositions(this->window);
+            this->screen_greet.updatePositions();
         }
 
-        this->screen_greet.handleEvents(event, this->window);
+        switch(this->currentScreen)
+        {
+            case Screens::Greet:this->screen_greet.handleEvents(event); break;
+            case Screens::Scene:this->screen_scene.handleEvents(event); break;
+        }
     }
 }
