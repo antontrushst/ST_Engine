@@ -10,10 +10,21 @@ InGameDisplay::InGameDisplay(
             temp.setFillColor(sf::Color::Green);
             return temp;
         }()}
+    , grid{position, 10.f, 1000.f, sf::Color::Blue, 100}
+    , gridVisibility{true}
 {}
 
 void InGameDisplay::draw(sf::RenderTarget &target,
     sf::RenderStates states) const
 {
     target.draw(this->shape, states);
+    if(this->gridVisibility)
+        target.draw(this->grid, states);
+}
+
+void InGameDisplay::setGridVisibility(bool visibility)
+{
+    if(gridVisibility == visibility)
+        return;
+    this->gridVisibility = visibility;
 }

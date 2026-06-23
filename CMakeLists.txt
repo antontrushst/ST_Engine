@@ -26,7 +26,8 @@ add_executable(${PROJECT_NAME} src/lag_main.cpp
     src/lag_mainWindow.cpp
     src/lag_screen_greet.cpp
     src/lag_screen_scene.cpp
-    src/lag_inGame_display.cpp)
+    src/lag_inGame_display.cpp
+    src/lag_grid.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src/headers" "st_library/")
 #uncomment for no-console execution on Windows
