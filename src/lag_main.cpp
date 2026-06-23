@@ -6,8 +6,7 @@ int main()
 {
     EngineConfig::getInstance().
         loadEngineConfig(st::getThisProgramLocation() /= "lag_config.cfg");
-    MainWindow mainWindow;
-    mainWindow.init();
+    MainWindow::get().init();
 
     return 0;
 }

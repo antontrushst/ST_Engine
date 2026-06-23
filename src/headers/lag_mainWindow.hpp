@@ -15,16 +15,21 @@ class MainWindow
     st_sfml::Textures textures;
     Screen_Greet screen_greet;
     Screen_Scene screen_scene;
-    enum class Screens{Greet, Scene};
-    Screens currentScreen;
-    
-public:
+
     MainWindow();
+
+public:
+
+    MainWindow(const MainWindow&) = delete;
+    void operator  =(const MainWindow&) = delete;
+    static MainWindow& get()
+    {
+        static MainWindow instance;
+        return instance;
+    }
 
     void init();
     void handleEvents();
-
-    sf::RenderWindow& getWindow() {return this->window;}
 };
 
 #endif

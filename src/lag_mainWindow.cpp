@@ -1,4 +1,5 @@
 #include "lag_mainWindow.hpp"
+#include "lag_screens.hpp"
 
 MainWindow::MainWindow()
     : window(sf::RenderWindow(sf::VideoMode(
@@ -9,7 +10,6 @@ MainWindow::MainWindow()
     , textures{{st::getThisProgramLocation() /= "graphics"}}
     , screen_greet{this->window, this->textures["lagnia_sketch_transp"]}
     , screen_scene{this->window}
-    , currentScreen{Screens::Greet}
 {
     this->window.setFramerateLimit(EngineConfig::getInstance().framerate);
 }
@@ -23,10 +23,10 @@ void MainWindow::init()
 
         this->window.clear(EngineConfig::getInstance().backColor);
     //  CLEARED SCREEN  ////////////////////////////////////////////////////////
-        switch(this->currentScreen)
+        switch(CurrentScreen)
         {
-            case Screens::Greet:this->screen_greet.draw(); break;
-            case Screens::Scene:this->screen_scene.draw(); break;
+            case Screens::Greet:{this->screen_greet.draw(); break;}
+            case Screens::Scene:{this->screen_scene.draw(); break;}
         }
     //  READY TO DISPLAY  //////////////////////////////////////////////////////
         this->window.display();
@@ -50,10 +50,10 @@ void MainWindow::handleEvents()
             this->screen_greet.updatePositions();
         }
 
-        switch(this->currentScreen)
+        switch(CurrentScreen)
         {
-            case Screens::Greet:this->screen_greet.handleEvents(event); break;
-            case Screens::Scene:this->screen_scene.handleEvents(event); break;
+            case Screens::Greet:{this->screen_greet.handleEvents(event); break;}
+            case Screens::Scene:{this->screen_scene.handleEvents(event); break;}
         }
     }
 }

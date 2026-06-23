@@ -384,7 +384,7 @@ struct Textures : public sf::Texture
             if(name == noextName)
                 return this->textures[i];
         }
-        st::msg_err({"Error: no texture with name " + name + "!"});
+        st::msg_err({"Error: no texture with name '" + name + "'!"});
         exit(-1);
     }
 };
