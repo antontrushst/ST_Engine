@@ -1,4 +1,7 @@
 #include "lag_screen_greet.hpp"
+#include "lag_config.hpp"
+#include "lag_file.hpp"
+#include "lag_screens.hpp"
 
 Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture &image)
     : window{window}
@@ -11,15 +14,15 @@ Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture &image)
             (this->window.getSize().y * 0.01f) * 85 - 55},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "new", 32,
-            EngineConfig::getInstance().backColor,
-            EngineConfig::getInstance().secondaryColor},
+            EngineConfig::getInstance().color_back,
+            EngineConfig::getInstance().color_second},
         {"openProject",
             {this->window.getSize().x * 0.5f,
             (this->window.getSize().y * 0.01f) * 85},
             {400.f, 50.f},
             EngineConfig::getInstance().font, "open", 32,
-            EngineConfig::getInstance().backColor,
-            EngineConfig::getInstance().secondaryColor}
+            EngineConfig::getInstance().color_back,
+            EngineConfig::getInstance().color_second}
     }}
 {
     // center Lagnia image origin and position it
@@ -36,7 +39,7 @@ Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture &image)
     this->title.setPosition({
         this->window.getSize().x * 0.5f,
         (this->window.getSize().y * 0.01f) * 15});
-    this->title.setFillColor(EngineConfig::getInstance().secondaryColor);
+    this->title.setFillColor(EngineConfig::getInstance().color_second);
 
     centeredOrigin = this->subTitle.getGlobalBounds().size * 0.5f +
         this->subTitle.getLocalBounds().position;
@@ -46,22 +49,22 @@ Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture &image)
         this->window.getSize().x * 0.5f,
         this->title.getPosition().y + this->title.getLocalBounds().size.y +
         5.f});
-    this->subTitle.setFillColor(EngineConfig::getInstance().secondaryColor);
+    this->subTitle.setFillColor(EngineConfig::getInstance().color_second);
 }
 
 void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
 {
     this->buttons["newProject"].
-        setColor(EngineConfig::getInstance().secondaryColor);
+        setColor(EngineConfig::getInstance().color_second);
     this->buttons["openProject"].
-        setColor(EngineConfig::getInstance().secondaryColor);
+        setColor(EngineConfig::getInstance().color_second);
     sf::Vector2i mousePosition{sf::Mouse::getPosition(this->window)};
 
     if(this->buttons["newProject"].contains({(float)mousePosition.x,
         (float)mousePosition.y}))
     {
         this->buttons["newProject"].setColor(
-            EngineConfig::getInstance().mainColor);
+            EngineConfig::getInstance().color_main);
 
         if(const auto *mouseButtonPressed =
             event->getIf<sf::Event::MouseButtonPressed>())
@@ -70,10 +73,10 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
                 if(std::optional<std::string> gameName{st_sfml::inputPopup(
                     this->window, EngineConfig::getInstance().font,
                     "Enter name of your game:",
-                    EngineConfig::getInstance().secondaryColor,
-                    EngineConfig::getInstance().backColor,
-                    EngineConfig::getInstance().mainColor,
-                    EngineConfig::getInstance().altColor)};
+                    EngineConfig::getInstance().color_second,
+                    EngineConfig::getInstance().color_back,
+                    EngineConfig::getInstance().color_main,
+                    EngineConfig::getInstance().color_alt)};
                     gameName.has_value())
                 {
                     std::filesystem::path newProject_path{
@@ -94,7 +97,7 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
         (float)mousePosition.y}))
     {
         this->buttons["openProject"].setColor(
-            EngineConfig::getInstance().mainColor);
+            EngineConfig::getInstance().color_main);
 
         if(const auto *mouseButtonPressed =
             event->getIf<sf::Event::MouseButtonPressed>())

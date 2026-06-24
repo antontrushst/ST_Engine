@@ -6,6 +6,6 @@ enum class Screens
     Greet, Scene
 };
 
-inline Screens CurrentScreen{Screens::Greet};
+inline Screens CurrentScreen{Screens::Scene};
 
 #endif

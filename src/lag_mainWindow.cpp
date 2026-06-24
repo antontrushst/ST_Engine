@@ -12,6 +12,7 @@ MainWindow::MainWindow()
     , screen_scene{this->window}
 {
     this->window.setFramerateLimit(EngineConfig::getInstance().framerate);
+    CurrentScreen = Screens::Scene;
 }
 
 void MainWindow::init()
@@ -21,7 +22,7 @@ void MainWindow::init()
     {
         this->handleEvents();
 
-        this->window.clear(EngineConfig::getInstance().backColor);
+        this->window.clear(EngineConfig::getInstance().color_back);
     //  CLEARED SCREEN  ////////////////////////////////////////////////////////
         switch(CurrentScreen)
         {
