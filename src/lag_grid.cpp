@@ -3,15 +3,13 @@
 #include <iostream>
 
 Grid::Grid(const sf::Vector2f &center, float step, float reach,
-           const sf::Color &color, std::uint8_t opacity)
+           const sf::Color &color, std::uint8_t opacity,
+           const sf::Color &colorX, const sf::Color &colorY)
     : step{step}
     , reach{reach}
-    , color{[&]()-> sf::Color
-        {
-            sf::Color temp{color};
-            temp.a = opacity;
-            return temp;
-        }()}
+    , color{sf::Color{color.r, color.g, color.b, opacity}}
+    , colorX{sf::Color{colorX.r, colorX.g, colorX.b, opacity}}
+    , colorY{sf::Color{colorY.r, colorY.g, colorY.b, opacity}}
     , lines{[&]()-> sf::VertexArray
         {
             sf::Vector2f min{center.x - reach, center.y - reach};
@@ -31,10 +29,23 @@ Grid::Grid(const sf::Vector2f &center, float step, float reach,
                 temp[i+2].position = {min.x, min.y + step * c};
                 temp[i+3].position = {max.x, min.y + step * c};
 
-                temp[i].color   = color;
-                temp[i+1].color = color;
-                temp[i+2].color = color;
-                temp[i+3].color = color;
+                temp[i].color   = this->color;
+                temp[i+1].color = this->color;
+                temp[i+2].color = this->color;
+                temp[i+3].color = this->color;
+            }
+
+            if(min.x < 0 && max.x > 0)
+            {
+                int i{static_cast<int>(std::ceil(std::abs(min.x) / step))};
+                temp[i*4].color = this->colorY;
+                temp[i*4+1].color = this->colorY;
+            }
+            if(min.y < 0 && max.y > 0)
+            {
+                int i{static_cast<int>(std::ceil(std::abs(min.y) / step))};
+                temp[i*4+2].color = this->colorX;
+                temp[i*4+3].color = this->colorX;
             }
             return temp;
         }()}

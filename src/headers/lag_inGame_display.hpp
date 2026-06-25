@@ -14,7 +14,8 @@ class InGameDisplay
     
 public:
     InGameDisplay(sf::RenderWindow &window, const sf::Vector2f &position,
-        const sf::Vector2f &size, const sf::Color &color_back,
+        const sf::Vector2f &size, const sf::Vector2f &inGamePos,
+        const sf::Color &color_back,
         const sf::Color &color_outline, const sf::Color &color_grid);
 
     void draw();

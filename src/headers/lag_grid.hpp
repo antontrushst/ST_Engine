@@ -1,6 +1,8 @@
 #ifndef LAG_GRID_HPP
 #define LAG_GRID_HPP
 
+// Grid for In-Game display to help with alignment and space orientation.
+
 #include <SFML/Graphics.hpp>
 
 class Grid : public sf::Drawable
@@ -8,13 +10,17 @@ class Grid : public sf::Drawable
     float step;
     float reach;
     sf::Color color;
+    sf::Color colorX;
+    sf::Color colorY;
     sf::VertexArray lines;
 
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
 public:
     Grid(const sf::Vector2f &center, float step = 10.f, float reach = 1000.f,
-        const sf::Color &color = sf::Color::White, std::uint8_t opacity = 255);
+        const sf::Color &color = sf::Color::White, std::uint8_t opacity = 255,
+        const sf::Color &colorX = sf::Color::Red,
+        const sf::Color &colorY = sf::Color::Green);
 
     Grid& setCenter(const sf::Vector2f &center);
     Grid& setColor(const sf::Color &color);
