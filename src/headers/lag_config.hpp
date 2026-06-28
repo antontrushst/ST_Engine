@@ -25,8 +25,8 @@ struct EngineConfig
     sf::Color color_second = color::SoftBlack;
     sf::Color color_back = color::Milk;
     sf::Color color_outline = color::SoftBlack;
-    sf::Color color_inGameBack = sf::Color::Black;
-    sf::Color color_grid = sf::Color::White;
+    sf::Color color_inGameBack = sf::Color::White;
+    sf::Color color_grid = color::SoftBlack;
 
     EngineConfig& loadEngineConfig(const std::filesystem::path &path);
 

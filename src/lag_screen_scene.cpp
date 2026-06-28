@@ -14,6 +14,8 @@ Screen_Scene::Screen_Scene(sf::RenderWindow &window)
 
 void Screen_Scene::draw()
 {
+    if(this->display.isHoveredOver())
+        std::cout << "hovered!\n";
     this->display.draw();
 }
 

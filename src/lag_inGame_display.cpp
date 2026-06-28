@@ -32,7 +32,7 @@ InGameDisplay::InGameDisplay(sf::RenderWindow &window,
             temp.setOutlineColor(color_outline);
             return temp;
         }()}
-    , grid{inGamePos, 20.f, std::max(size.x, size.y), color_grid, 50}
+    , grid{inGamePos, 20.f, std::max(size.x, size.y), color_grid, 70}
     , gridVisibility{true}
 {}
 
@@ -50,4 +50,16 @@ void InGameDisplay::setGridVisibility(bool visibility)
     if(gridVisibility == visibility)
         return;
     this->gridVisibility = visibility;
+}
+bool InGameDisplay::isHoveredOver() const
+{
+    sf::Vector2i mousePos{sf::Mouse::getPosition(this->window)};
+    sf::FloatRect viewport{this->view.getViewport()};
+    sf::FloatRect viewPixels{{
+        viewport.position.x * this->window.getSize().x,
+        viewport.position.y  * this->window.getSize().y},
+        {viewport.size.x * this->window.getSize().x,
+        viewport.size.y * this->window.getSize().y}};
+    return viewPixels.contains({
+        static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)});
 }

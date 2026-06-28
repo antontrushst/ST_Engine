@@ -18,10 +18,12 @@ public:
         const sf::Color &color_back,
         const sf::Color &color_outline, const sf::Color &color_grid);
 
-    void draw();
     Grid& getGrid() {return this->grid;}
     bool isGridVisible() const {return this->gridVisibility;}
     void setGridVisibility(bool visibility);
+    bool isHoveredOver() const;
+    void draw();
+    void handleEvents(const std::optional<sf::Event> &event);
 };
 
 #endif
