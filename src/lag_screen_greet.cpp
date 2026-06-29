@@ -29,6 +29,40 @@ lag::Screen_Greet::Screen_Greet(
             EngineConfig::getInstance().color_back,
             EngineConfig::getInstance().color_second}
     }}
+    , screen_center{window.getSize().x * 0.5f, window.getSize().y * 0.5f}
+    , button_new_size{400.f, 50.f}
+    , button_new_pos{
+        this->screen_center.x - this->button_new_size.x * 0.5f,
+        ((this->window.getSize().y * 0.01f) * 85 - 55) -
+            this->button_new_size.y * 0.5f}
+    , button_open_size{400.f, 50.f}
+    , button_open_pos{this->button_new_pos.x,
+        this->button_new_pos.y + 55.f}
+    , button_color_text{
+        EngineConfig::getInstance().color_back.r,
+        EngineConfig::getInstance().color_back.g,
+        EngineConfig::getInstance().color_back.b,
+        EngineConfig::getInstance().color_back.a}
+    , button_color_idle{
+        EngineConfig::getInstance().color_second.r,
+        EngineConfig::getInstance().color_second.g,
+        EngineConfig::getInstance().color_second.b,
+        150}
+    , button_color_hovered{
+        EngineConfig::getInstance().color_second.r,
+        EngineConfig::getInstance().color_second.g,
+        EngineConfig::getInstance().color_second.b,
+        EngineConfig::getInstance().color_second.a}
+    , button_new_color_active{
+        EngineConfig::getInstance().color_main.r,
+        EngineConfig::getInstance().color_main.g,
+        EngineConfig::getInstance().color_main.b,
+        EngineConfig::getInstance().color_main.a}
+    , button_open_color_active{
+        EngineConfig::getInstance().color_alt.r,
+        EngineConfig::getInstance().color_alt.g,
+        EngineConfig::getInstance().color_alt.b,
+        EngineConfig::getInstance().color_alt.a}
 {
     // center Lagnia image origin and position it
     sf::Vector2f centeredOrigin{this->LagniaImage.getGlobalBounds().size * .5f +
@@ -59,7 +93,7 @@ lag::Screen_Greet::Screen_Greet(
 
 void lag::Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
 {
-    this->buttons["newProject"].
+/*    this->buttons["newProject"].
         setColor(EngineConfig::getInstance().color_second);
     this->buttons["openProject"].
         setColor(EngineConfig::getInstance().color_second);
@@ -118,7 +152,7 @@ void lag::Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
                 CurrentScreen = Screens::Editor;
             }
         return;
-    }
+    }*/
 }
 
 void lag::Screen_Greet::update(ImFont *font)
@@ -131,21 +165,37 @@ void lag::Screen_Greet::update(ImFont *font)
 
     if(!ImGui::Begin("GlobalOverlay", nullptr, overlayFlags))
         st::msg_err("Failed to create ImGui overlay on Screen_Greet!");
-    ImGui::SetCursorPos(ImVec2(100,150));
-
     ImGui::PushFont(font);
-    if(ImGui::Button("button_new", ImVec2(150,40)))
+    // button NEW
+    ImGui::SetCursorPos(this->button_new_pos);
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)this->button_color_text);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)this->button_color_idle);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+        (ImVec4)this->button_color_hovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+        (ImVec4)this->button_new_color_active);
+    if(ImGui::Button("new", this->button_new_size))
     {std::cout << "PRESSED!\n";}
+    ImGui::PopStyleColor(4);
+    // button OPEN
+    ImGui::SetCursorPos(this->button_open_pos);
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)this->button_color_text);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)this->button_color_idle);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+        (ImVec4)this->button_color_hovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+        (ImVec4)this->button_open_color_active);
+    if(ImGui::Button("open", this->button_open_size))
+    {std::cout << "PRESSED!\n";}
+    ImGui::PopStyleColor(4);
+
     ImGui::PopFont();
-    
+
     ImGui::End();
 }
 
 void lag::Screen_Greet::draw()
 {
-    for(int i{0}; i < this->buttons.buttons.size(); i++)
-        this->window.draw(this->buttons[i]);
-
     this->window.draw(this->LagniaImage);
     this->window.draw(this->title);
     this->window.draw(this->subTitle);

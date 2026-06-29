@@ -33,6 +33,9 @@ void lag::Window::init()
     this->font_large =
         io.Fonts->AddFontFromFileTTF(EngineConfig::getInstance().font
             .string().c_str(), 24.f);
+    this->font_huge =
+        io.Fonts->AddFontFromFileTTF(EngineConfig::getInstance().font
+            .string().c_str(), 32.f);
     if(!ImGui::SFML::UpdateFontTexture())
         st::msg_err("ImGui-SFML failed to update font texture!");
 
@@ -85,7 +88,7 @@ void lag::Window::update()
     switch(lag::CurrentScreen)
     {
         case lag::Screens::Greet: {
-            this->screen_greet->update(this->font_small); break;}
+            this->screen_greet->update(this->font_huge); break;}
         case lag::Screens::Editor: {
             this->screen_editor->update(); break;}
     }

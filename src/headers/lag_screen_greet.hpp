@@ -15,6 +15,18 @@ class Screen_Greet
     sf::Text         subTitle;
     sf::Sprite       LagniaImage;
     st_sfml::Buttons buttons;
+
+    ImVec2 screen_center;
+    ImVec2 button_new_size;
+    ImVec2 button_new_pos;
+    ImVec2 button_open_size;
+    ImVec2 button_open_pos;
+
+    ImColor button_color_text;
+    ImColor button_color_idle;
+    ImColor button_color_hovered;
+    ImColor button_new_color_active;
+    ImColor button_open_color_active;
 public:
     Screen_Greet(sf::RenderWindow &window, const sf::Texture &image);
 

@@ -25,6 +25,7 @@ class Window
     ImFont *font_small;
     ImFont *font_regular;
     ImFont *font_large;
+    ImFont *font_huge;
 
 public:
     Window();
