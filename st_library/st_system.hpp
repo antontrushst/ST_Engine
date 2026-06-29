@@ -12,6 +12,7 @@
 #include <objbase.h>
 #include <optional>
 #include <initializer_list>
+#include <cstdlib>
 
 namespace st
 {
@@ -34,7 +35,7 @@ namespace st
         std::cout << "\033[32m" << text << "\033[0m" << std::endl;
     }
 
-    inline void msg_err(std::string_view text,
+    inline void msg_err(std::string_view text,bool exit = false,
         const std::source_location location = std::source_location::current())
     {
         #if defined(_WIN32) || defined(_WIN64)
@@ -49,6 +50,8 @@ namespace st
             " on line " << location.line() << "!\n";
             std::cout << text << std::endl;
             SetConsoleTextAttribute(hConsole, originalColor);
+            if(exit)
+                std::_Exit(EXIT_FAILURE);
             return;
 
         #endif
@@ -57,6 +60,8 @@ namespace st
             " in function " << location.function_name() <<
             " on line " << location.line() << "!\n" <<
             text << "\033[0m" << std::endl;
+        if(exit)
+            std::_Exit(EXIT_FAILURE);
     }
 
     inline void msg_warn(std::string_view text,

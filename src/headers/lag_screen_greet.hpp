@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "st_sfml.hpp"
+namespace lag {
 
 class Screen_Greet
 {
@@ -14,9 +15,10 @@ class Screen_Greet
 public:
     Screen_Greet(sf::RenderWindow &window, const sf::Texture &image);
 
-    void handleEvents(const std::optional<sf::Event> &event);
+    void update(const std::optional<sf::Event> &event);
     void draw();
     void updatePositions();
 };
 
+}
 #endif

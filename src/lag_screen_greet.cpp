@@ -3,7 +3,8 @@
 #include "lag_file.hpp"
 #include "lag_screens.hpp"
 
-Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture &image)
+lag::Screen_Greet::Screen_Greet(
+        sf::RenderWindow &window, const sf::Texture &image)
     : window{window}
     , title{EngineConfig::getInstance().titleFont, "LAGNIA", 96}
     , subTitle{EngineConfig::getInstance().titleFont, "game engine", 36}
@@ -52,7 +53,7 @@ Screen_Greet::Screen_Greet(sf::RenderWindow &window, const sf::Texture &image)
     this->subTitle.setFillColor(EngineConfig::getInstance().color_second);
 }
 
-void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
+void lag::Screen_Greet::update(const std::optional<sf::Event> &event)
 {
     this->buttons["newProject"].
         setColor(EngineConfig::getInstance().color_second);
@@ -88,7 +89,7 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
                     std::filesystem::create_directory(
                         newProject_path /= gameName.value());
                     LagFile::get().create(newProject_path, gameName.value());
-                    CurrentScreen = Screens::Scene;
+                    CurrentScreen = Screens::Editor;
                 }
             }
     }
@@ -110,13 +111,13 @@ void Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
                     return;
 
                 LagFile::get().load(lagFile_path);
-                CurrentScreen = Screens::Scene;
+                CurrentScreen = Screens::Editor;
             }
         return;
     }
 }
 
-void Screen_Greet::draw()
+void lag::Screen_Greet::draw()
 {
     for(int i{0}; i < this->buttons.buttons.size(); i++)
         this->window.draw(this->buttons[i]);
@@ -126,7 +127,7 @@ void Screen_Greet::draw()
     this->window.draw(this->subTitle);
 }
 
-void Screen_Greet::updatePositions()
+void lag::Screen_Greet::updatePositions()
 {
     this->LagniaImage.setPosition({
         (float)this->window.getSize().x * 0.5f,

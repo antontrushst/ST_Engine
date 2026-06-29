@@ -10,12 +10,14 @@
 #include "lag_colors.hpp"
 #include "st_sfml.hpp"
 
+namespace lag {
+
 struct EngineConfig
 {
-    int mainWindow_width = 1280;
-    int mainWindow_height = 720;
-    int mainWindow_minWidth = 300;
-    int mainWindow_minHeight = 300;
+    int window_width = 1280;
+    int window_height = 720;
+    int window_minWidth = 300;
+    int window_minHeight = 300;
     int framerate = 60;
     sf::Font font{st::getThisProgramLocation() /= "fonts/Proletarsk.ttf"};
     sf::Font titleFont{st::getThisProgramLocation() /= "fonts/logo_2K12.ttf"};
@@ -47,15 +49,15 @@ inline EngineConfig& EngineConfig::loadEngineConfig(
 {
     enum class keys
     {
-        mainWindow_width, mainWindow_height,
+        window_width, window_height,
         color_main, color_alt, color_second, color_back,
         color_outline, color_inGameBack, color_grid
     };
 
     std::map<std::string, keys> keysMap =
     {
-        {"mainWindow_width", keys::mainWindow_width},
-        {"mainWindow_height", keys::mainWindow_height},
+        {"window_width", keys::window_width},
+        {"window_height", keys::window_height},
         {"color_main", keys::color_main},
         {"color_alt", keys::color_alt},
         {"color_second", keys::color_second},
@@ -80,10 +82,10 @@ inline EngineConfig& EngineConfig::loadEngineConfig(
             
             switch(it->second)
             {
-                case keys::mainWindow_width:{
-                    this->mainWindow_width = std::stoi(value); break;}
-                case keys::mainWindow_height:{
-                    this->mainWindow_height = std::stoi(value); break;}
+                case keys::window_width:{
+                    this->window_width = std::stoi(value); break;}
+                case keys::window_height:{
+                    this->window_height = std::stoi(value); break;}
                 case keys::color_main:{
                     std::stringstream ss(value);
                     std::string subValue;
@@ -203,10 +205,10 @@ inline EngineConfig& EngineConfig::loadEngineConfig(
     std::ofstream configFile(path);
     if(configFile.is_open())
     {
-        configFile << "mainWindow_width="
-                   << std::to_string(this->mainWindow_width) << std::endl;
-        configFile << "mainWindow_height="
-                   << std::to_string(this->mainWindow_height) << std::endl;
+        configFile << "window_width="
+                   << std::to_string(this->window_width) << std::endl;
+        configFile << "window_height="
+                   << std::to_string(this->window_height) << std::endl;
         configFile << "color_main="
                    << std::to_string(this->color_main.r) << ","
                    << std::to_string(this->color_main.g) << ","
@@ -246,6 +248,8 @@ inline EngineConfig& EngineConfig::loadEngineConfig(
     }
 
     return *this;
+}
+
 }
 
 #endif

@@ -1,8 +1,8 @@
-#include "lag_screen_scene.hpp"
+#include "lag_screen_editor.hpp"
 #include "lag_config.hpp"
 #include "lag_screens.hpp"
 
-Screen_Scene::Screen_Scene(sf::RenderWindow &window)
+lag::Screen_Editor::Screen_Editor(sf::RenderWindow &window)
     : window{window}
     , display{window, {window.getSize().x * 0.5f,
         window.getSize().y * 0.5f}, {640.f, 360.f}, {0.f, 0.f},
@@ -12,14 +12,14 @@ Screen_Scene::Screen_Scene(sf::RenderWindow &window)
 {
 }
 
-void Screen_Scene::draw()
+void lag::Screen_Editor::draw()
 {
     if(this->display.isHoveredOver())
         std::cout << "hovered!\n";
     this->display.draw();
 }
 
-void Screen_Scene::handleEvents(const std::optional<sf::Event> &event)
+void lag::Screen_Editor::update(const std::optional<sf::Event> &event)
 {
 
 }

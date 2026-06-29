@@ -1,12 +1,12 @@
 #include "lag_config.hpp"
-#include "lag_mainWindow.hpp"
+#include "lag_window.hpp"
 #include "st_system.hpp"
 
 int main()
 {
-    EngineConfig::getInstance().
+    lag::EngineConfig::getInstance().
         loadEngineConfig(st::getThisProgramLocation() /= "lag_config.cfg");
-    MainWindow::get().init();
+    lag::Window::get().init();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

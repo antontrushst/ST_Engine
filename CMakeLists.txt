@@ -39,11 +39,11 @@ option(IMGUI_SFML_IMGUI_DEMO "Build imgui_demo.cpp" ON)
 FetchContent_MakeAvailable(imgui-sfml)
 
 add_executable(${PROJECT_NAME} src/lag_main.cpp
-    src/lag_mainWindow.cpp
-    src/lag_screen_greet.cpp
-    src/lag_screen_scene.cpp
+    src/lag_window.cpp
     src/lag_inGame_display.cpp
-    src/lag_grid.cpp)
+    src/lag_grid.cpp
+    src/lag_screen_greet.cpp
+    src/lag_screen_editor.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE "src/headers" "st_library/")
 #uncomment for no-console execution on Windows
