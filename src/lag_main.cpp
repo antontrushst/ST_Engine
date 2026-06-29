@@ -6,7 +6,9 @@ int main()
 {
     lag::EngineConfig::getInstance().
         loadEngineConfig(st::getThisProgramLocation() /= "lag_config.cfg");
-    lag::Window::get().init();
+
+    lag::Window window;
+    window.init();
 
     return EXIT_SUCCESS;
 }

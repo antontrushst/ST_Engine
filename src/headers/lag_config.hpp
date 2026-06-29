@@ -19,8 +19,10 @@ struct EngineConfig
     int window_minWidth = 300;
     int window_minHeight = 300;
     int framerate = 60;
-    sf::Font font{st::getThisProgramLocation() /= "fonts/Proletarsk.ttf"};
-    sf::Font titleFont{st::getThisProgramLocation() /= "fonts/logo_2K12.ttf"};
+    std::filesystem::path font{
+        st::getThisProgramLocation() /= "fonts/Proletarsk.ttf"};
+    std::filesystem::path titleFont{
+        st::getThisProgramLocation() /= "fonts/logo_2K12.ttf"};
     st_sfml::Textures buttonIcons{st::getThisProgramLocation() /= "graphics"};
     sf::Color color_main = color::Toxic;
     sf::Color color_alt = color::Crimson;

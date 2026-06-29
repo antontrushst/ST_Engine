@@ -2,26 +2,30 @@
 #include "lag_config.hpp"
 #include "lag_file.hpp"
 #include "lag_screens.hpp"
+#include "imgui.h"
+#include "imgui-SFML.h"
 
 lag::Screen_Greet::Screen_Greet(
         sf::RenderWindow &window, const sf::Texture &image)
     : window{window}
-    , title{EngineConfig::getInstance().titleFont, "LAGNIA", 96}
-    , subTitle{EngineConfig::getInstance().titleFont, "game engine", 36}
+    , titleFont{EngineConfig::getInstance().titleFont}
+    , subTitleFont{EngineConfig::getInstance().font}
+    , title{this->titleFont, "LAGNIA", 96}
+    , subTitle{this->subTitleFont, "game engine", 36}
     , LagniaImage{image}
     , buttons{{
         {"newProject",
             {this->window.getSize().x * 0.5f,
             (this->window.getSize().y * 0.01f) * 85 - 55},
             {400.f, 50.f},
-            EngineConfig::getInstance().font, "new", 32,
+            this->subTitleFont, "new", 32,
             EngineConfig::getInstance().color_back,
             EngineConfig::getInstance().color_second},
         {"openProject",
             {this->window.getSize().x * 0.5f,
             (this->window.getSize().y * 0.01f) * 85},
             {400.f, 50.f},
-            EngineConfig::getInstance().font, "open", 32,
+            this->subTitleFont, "open", 32,
             EngineConfig::getInstance().color_back,
             EngineConfig::getInstance().color_second}
     }}
@@ -53,7 +57,7 @@ lag::Screen_Greet::Screen_Greet(
     this->subTitle.setFillColor(EngineConfig::getInstance().color_second);
 }
 
-void lag::Screen_Greet::update(const std::optional<sf::Event> &event)
+void lag::Screen_Greet::handleEvents(const std::optional<sf::Event> &event)
 {
     this->buttons["newProject"].
         setColor(EngineConfig::getInstance().color_second);
@@ -72,7 +76,7 @@ void lag::Screen_Greet::update(const std::optional<sf::Event> &event)
             if(mouseButtonPressed->button == sf::Mouse::Button::Left)
             {
                 if(std::optional<std::string> gameName{st_sfml::inputPopup(
-                    this->window, EngineConfig::getInstance().font,
+                    this->window, this->subTitleFont,
                     "Enter name of your game:",
                     EngineConfig::getInstance().color_second,
                     EngineConfig::getInstance().color_back,
@@ -115,6 +119,26 @@ void lag::Screen_Greet::update(const std::optional<sf::Event> &event)
             }
         return;
     }
+}
+
+void lag::Screen_Greet::update(ImFont *font)
+{
+    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
+    ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
+    ImGuiWindowFlags overlayFlags =
+        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoMove;
+
+    if(!ImGui::Begin("GlobalOverlay", nullptr, overlayFlags))
+        st::msg_err("Failed to create ImGui overlay on Screen_Greet!");
+    ImGui::SetCursorPos(ImVec2(100,150));
+
+    ImGui::PushFont(font);
+    if(ImGui::Button("button_new", ImVec2(150,40)))
+    {std::cout << "PRESSED!\n";}
+    ImGui::PopFont();
+    
+    ImGui::End();
 }
 
 void lag::Screen_Greet::draw()

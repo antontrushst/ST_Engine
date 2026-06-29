@@ -12,14 +12,19 @@ lag::Screen_Editor::Screen_Editor(sf::RenderWindow &window)
 {
 }
 
+void lag::Screen_Editor::handleEvents(const std::optional<sf::Event> &event)
+{
+
+}
+
+void lag::Screen_Editor::update()
+{
+
+}
+
 void lag::Screen_Editor::draw()
 {
     if(this->display.isHoveredOver())
         std::cout << "hovered!\n";
     this->display.draw();
-}
-
-void lag::Screen_Editor::update(const std::optional<sf::Event> &event)
-{
-
 }

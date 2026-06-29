@@ -4,6 +4,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <imgui.h>
 
 #include "st_sfml.hpp"
 #include "lag_config.hpp"
@@ -15,27 +16,22 @@ class Screen_Editor;
 
 class Window
 {
-    friend struct std::default_delete<Window>;
-    
-    sf::RenderWindow window;
-    st_sfml::Textures textures;
+    friend class std::default_delete<Window>;
+   
     std::unique_ptr<Screen_Greet> screen_greet;
     std::unique_ptr<Screen_Editor> screen_editor;
-
-    Window();
-    ~Window();
+    sf::RenderWindow window;
+    st_sfml::Textures textures;
+    ImFont *font_small;
+    ImFont *font_regular;
+    ImFont *font_large;
 
 public:
-
-    Window(const Window&) = delete;
-    void operator  =(const Window&) = delete;
-    static Window& get()
-    {
-        static Window instance;
-        return instance;
-    }
-
+    Window();
+    ~Window();
+    
     void init();
+    void handleEvents();
     void update();
     void draw();
 };

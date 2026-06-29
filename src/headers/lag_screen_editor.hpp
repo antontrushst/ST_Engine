@@ -13,8 +13,9 @@ class Screen_Editor
 public:
     Screen_Editor(sf::RenderWindow &window);
 
+    void handleEvents(const std::optional<sf::Event> &event);
+    void update();
     void draw();
-    void update(const std::optional<sf::Event> &event);
 };
 
 }
